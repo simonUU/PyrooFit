@@ -38,7 +38,7 @@ d['mass'] = np.append(np.random.random_sample(1000)*6 -3,
 df = pd.DataFrame(df)
 
 
-x = pyroofit.create_variable(name='mass', min=-3, max=3, unit='GeV')
+x = ROOT.RooRealVar('mass','M', 0, -3, 3,'GeV')
 
 pdf_sig = Gauss(x, mean=[-1,1])
 pdf_bkg = Chebychev(x,n=1)

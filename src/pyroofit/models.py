@@ -9,7 +9,7 @@
 
 from .pdf import PDF
 from .composits import AddPdf, ProdPdf
-from .observables import Var, create_roo_variable
+from .observables import create_roo_variable
 
 import ROOT
 
@@ -20,46 +20,42 @@ class Gauss(PDF):
     """
     def __init__(self,
                  observable,
-                 mean=Var(min=-1, max=1),
-                 sigma=Var(min=0, max=1),
-                 name='gauss_sig',
-                 title='Gaussian PDF',
-                 **kwds):
+                 mean=(-1, 0, 1),
+                 sigma=(0, 1),
+                 name='gauss',
+                 title='Gaussian PDF', **kwds):
 
         super(Gauss, self).__init__(name=name, title=title, **kwds)
 
-        self._add_observable(observable)
+        x = self.add_observable(observable)
 
-        self._add_parameter(mean, "mean")
-        self._add_parameter(sigma, "sigma")
+        mean = self.add_parameter(mean, "mean")
+        sigma = self.add_parameter(sigma, "sigma")
 
-        self.roo_pdf = ROOT.RooGaussian(name, title, self.get_observable(), self.params['mean'], self.params['sigma'])
+        self.roo_pdf = ROOT.RooGaussian(self.name, title, x, mean, sigma)
 
 
 class BifurGauss(PDF):
-    """ Bifur gaussian
+    """ Bifurcated gaussian
 
     """
 
     def __init__(self,
                  observable,
-                 mean=Var(lwb=-1, upb=1),
-                 sigmaL=Var(lwb=0, upb=1),
-                 sigmaR=Var(lwb=0, upb=1),
-                 name='BifurGauss', **kwds):
+                 mean=(-1, 0, 1),
+                 sigma_left=(0, 1),
+                 sigma_right=(0, 1),
+                 name='bigauss', **kwds):
 
         super(BifurGauss, self).__init__(name=name, **kwds)
 
-        roo_observable = self._add_observable(observable)
+        x = self.add_observable(observable)
 
-        roo_mean = self._add_parameter(mean, "mean")
-        roo_sigmaL = self._add_parameter(sigmaL, "sigmaL")
-        roo_sigmaR = self._add_parameter(sigmaR, "sigmaR")
+        mean = self.add_parameter(mean, "mean")
+        sigma_left = self.add_parameter(sigma_left, "sigma_left")
+        sigma_right = self.add_parameter(sigma_right, "sigma_right")
 
-        name = self.name
-        title = 'RooBifurGauss PDF'
-
-        self.roo_pdf = ROOT.RooBifurGauss(name, title, roo_observable, roo_mean, roo_sigmaL, roo_sigmaR)
+        self.roo_pdf = ROOT.RooBifurGauss(self.name, self.title, x, mean, sigma_left, sigma_right)
 
 
 class BreitWigner(PDF):
@@ -68,16 +64,16 @@ class BreitWigner(PDF):
     """
     def __init__(self,
                  observable,
-                 mean=Var(lwb=-1, upb=1),
-                 sigma=Var(lwb=0, upb=1),
-                 name='BreitWigner', **kwds):
+                 mean=(-1, 0, 1),
+                 sigma=(0, 1),
+                 name='bw', **kwds):
 
         super(BreitWigner, self).__init__(name=name, **kwds)
 
-        roo_observable = self._add_observable(observable)
+        roo_observable = self.add_observable(observable)
 
-        roo_mean = self._add_parameter(mean, name="mean")
-        roo_sigma = self._add_parameter(sigma, name="sigma")
+        roo_mean = self.add_parameter(mean, name="mean")
+        roo_sigma = self.add_parameter(sigma, name="sigma")
 
         name = self.name
         title = 'BreitWigner PDF'
@@ -90,62 +86,43 @@ class Argus(PDF):
 
     """
     def __init__(self,
-                 observable=Var('mbc'),
-                 m0=Var("argus_m0", val=5.2889, lwb=5.288, upb=5.289),
-                 c=Var("argus_c", val=-50, lwb=-1000, upb=1),
-                 name="argus",
-                 **kwds):
-        self.initial_m0 = m0
-        self.initial_c = c
+                 observable,
+                 m0=(5.2889, 5.288, 5.289),
+                 c=(-50, -1000, 1),
+                 name="argus", **kwds):
 
         super(Argus, self).__init__(name=name, observables=[observable], **kwds)
 
-    def init_pdf(self):
-        roo_observable = self.get_observable()
-        roo_argus_m0 = self._add_parameter(self.initial_m0, name="%s_m0"%self.name)
-        roo_argus_c = self._add_parameter(self.initial_c, name="%s_c"%self.name)
+        x = self.get_observable()
+        roo_argus_m0 = self.add_parameter(m0, "m0")
+        roo_argus_c = self.add_parameter(c, "c")
 
-        name = self.name
-        title = "Argus"
-
-        self.roo_pdf = ROOT.RooArgusBG(name, title, roo_observable, roo_argus_m0, roo_argus_c)
-        self.roo_pdf.Print()
+        self.roo_pdf = ROOT.RooArgusBG(self.name, self.title, x, roo_argus_m0, roo_argus_c)
 
 
 class CrystalBall(PDF):
     """ Crystal Ball PDF
 
-        Args:
-            observable (str) or (RooRealVar): observable for the pdf
         """
     def __init__(self,
-                 observable='mbc',
-                 mean=Var("cb_mean", val=5.2794, lwb=5.276, upb=5.29),
-                 sigma=Var("cb_sigma", val=0.00259, lwb=0.0012, upb=0.004),
-                 alpha=Var("cb_alpha", val=2.45104, lwb=0.5, upb=5),
-                 n=Var("cb_n", val=1.907, lwb=1.0, upb=20.0),
-                 name="cb",
-                 **kwds):
+                 observable,
+                 mean=(5.2794, 5.276, 5.29),
+                 sigma=(0.00259, 0.0012, 0.004),
+                 alpha=(2.45104, 0.5, 5),
+                 n=(1.907, 1.0, 20.0),
+                 name="cb", **kwds):
 
-        self.initial_mean = mean
-        self.initial_sigma = sigma
-        self.initial_alpha = alpha
-        self.initial_n = n
+        super(CrystalBall, self).__init__(name=name, **kwds)
 
-        super(CrystalBall, self).__init__(name=name, observables=[observable], **kwds)
+        roo_observable = self.add_observable(observable)
 
-    def init_pdf(self):
-        roo_observable = self.get_observable()
+        roo_cb_mean = self.add_parameter(mean, "mean")
+        roo_cb_sigma = self.add_parameter(sigma, "sigma")
+        roo_cb_alpha = self.add_parameter(alpha, "alpha")
+        roo_cb_n = self.add_parameter(n, "n")
 
-        roo_cb_mean = self._add_parameter(self.initial_mean, name="%s_mean"%self.name)
-        roo_cb_sigma = self._add_parameter(self.initial_sigma, name="%s_sigma"%self.name)
-        roo_cb_alpha = self._add_parameter(self.initial_alpha, name="%s_alpha"%self.name)
-        roo_cb_n = self._add_parameter(self.initial_n, name="%s_n"%self.name)
 
-        name = self.name
-        title = "CB Shape"
-
-        self.roo_pdf = ROOT.RooCBShape(name, title, roo_observable,
+        self.roo_pdf = ROOT.RooCBShape(self.name, self.title, roo_observable,
                                        roo_cb_mean, roo_cb_sigma, roo_cb_alpha, roo_cb_n)
 
 
@@ -159,29 +136,23 @@ class Mbc(AddPdf):
         number of background candidates there.
 
     """
-    def __init__(self, observable=Var("mbc", lwb=5.22, upb=5.3), name='mbc_model', mc_shape=True, **kwds):
+    def __init__(self,
+                 observable=("mbc", 5.22, 5.3),
+                 name='mbc', **kwds):
+
         argus_bkg_pdf = Argus(observable, name="bkg")
         cb_sig_pdf = CrystalBall(observable, name="cb")
-        super(Mbc, self).__init__(pdfs=[ cb_sig_pdf, argus_bkg_pdf], name=name, **kwds)
-        if mc_shape:
-            self.set_data_shape()
-
-    def set_data_shape(self):
-        self.params['cb_mean'].setVal(5.27950857339)
-        self.params['cb_sigma'].setVal(0.00257244992496)
-        self.params['cb_alpha'].setVal(2.6510288204)
-        self.params['cb_n'].setVal(1.15959232008)
-        self.pdfs['cb'].fix(True)
+        super(Mbc, self).__init__(pdfs=[cb_sig_pdf, argus_bkg_pdf], name=name, **kwds)
+        self.set_mc_shape()
 
     def set_mc_shape(self):
-        self.params['cb_mean'].setVal(5.27950857339)
-        self.params['cb_sigma'].setVal(0.00257244992496)
-        self.params['cb_alpha'].setVal(2.6510288204)
-        self.params['cb_n'].setVal(1.15959232008)
-        self.pdfs['sig'].fix(True)
+        self.parameters['mean'].setVal(5.27950857339)
+        self.parameters['sigma'].setVal(0.00257244992496)
+        self.parameters['alpha'].setVal(2.6510288204)
+        self.parameters['n'].setVal(1.15959232008)
+        self.pdfs['cb'].fix(True)
 
     def get_argus_integral(self, lwb, upb):
-        for roo_observable in self.observables.values(): pass
         roo_observable = self.get_observable()
         roo_observable.setRange("intrange", lwb, upb)
         integral = self.pdfs['bkg']().analyticalIntegral(1, 'intrange')
@@ -203,7 +174,7 @@ class Chebychev(PDF):
         This is a generic polynomial PDF
 
     """
-    def __init__(self, observable, n=3, name='chebychev_bkg', **kwds):
+    def __init__(self, observable, n=3, name='chebychev', **kwds):
         """
         Args:
             observable (str) or (RooRealVar) or (list): Observable for the pdf
@@ -213,24 +184,17 @@ class Chebychev(PDF):
         self.n = n
         super(Chebychev, self).__init__(name=name, observables=[observable], **kwds)
 
-        self.use_extended = False
-
-    def init_pdf(self):
-        roo_observable = self.get_observable()
+        roo_observable = self.add_observable(observable)
 
         arglist_params = ROOT.RooArgList()
         for i in range(self.n):
             param_name = "{name}_{i}".format(name=self.name, i=i)
-            param_title = "a{i}".format(i=i)
 
-            param_var= Var(param_name, title=param_title, lwb=-1, upb=1, val=0.1)
-            roo_param = self._add_parameter(param_var)
+            param_var = (-1, 1, 0.1)
+            roo_param = self.add_parameter(param_var, param_name)
             arglist_params.add(roo_param)
 
-        name = self.name
-        title = "Chebychev"
-
-        self.roo_pdf = ROOT.RooChebychev(name, title, roo_observable, arglist_params)
+        self.roo_pdf = ROOT.RooChebychev(self.name, self.title, roo_observable, arglist_params)
 
 
 class ChebychevProd(ProdPdf):
@@ -270,11 +234,10 @@ class KernelDensity(PDF):
 class KernelDensityProd(ProdPdf):
     def __init__(self, observables, data=None, weights=None, name=None, **kwds):
         name = 'bkg' if name is None else name
-        #print("fucking Hell")
         pdfs = {}
         super(KernelDensityProd, self).__init__(pdfs=pdfs, name=name, **kwds)
         for o in observables:
-            self._add_observable(observables[o])
+            self.add_observable(observables[o])
             # roo_observable = create_roo_variable(observable)
             # observable_name = roo_observable.GetName()
             # kernel_density_factor = KernelDensity(observable, data, weights, name=name+observable_name)
@@ -298,126 +261,3 @@ class KernelDensityProd(ProdPdf):
         self.init_pdf()
 
 
-class Afb(PDF):
-    """ Forward backward asymmetry Pdf
-
-    """
-    def __init__(self,
-                 observable,
-                 FL=Var("FL", val=0.4, lwb=0, upb=1),
-                 AFB=Var("AFB", val=0.13, lwb=-1, upb=2),
-                 name='afb_model',
-                 **kwds):
-        """
-
-        Args:
-            observable (str) or (RooRealVar) or (list): Observable for the pdf
-            FL (Optional[RooRealVar]): Optional override for the FL measure
-                Can be used for simultaneous fitting
-        """
-        self.initial_FL = FL
-        self.initial_AFB = AFB
-
-        super(Afb, self).__init__(name=name, observables=[observable], **kwds)
-
-    def init_pdf(self):
-        roo_observable = self.get_observable()
-
-        roo_afb = self._add_parameter(self.initial_AFB, name="AFB")
-        roo_fl = self._add_parameter(self.initial_FL, name="FL")
-
-        observable_name = roo_observable.GetName()
-        fl_name = roo_fl.GetName()
-        afb_name = roo_afb.GetName()
-
-        p2_formula = "(2/3.)*({AFB}/(1.-{FL}))".format(AFB=afb_name, FL=fl_name)
-        self.P2 = ROOT.RooFormulaVar('P2', 'P2', p2_formula, ROOT.RooArgList(roo_afb, roo_fl))
-        self._add_parameter(self.P2, name="P2")
-
-
-
-        formula_template = "(3/4.0)*{FL}*(1-{x}*{x})+(3/8.)*(1-{FL})*(1+{x}*{x})+{AFB}*{x}"
-        formula = formula_template.format(x=observable_name, FL=fl_name, AFB=afb_name)
-
-        arglist_params = ROOT.RooArgList(roo_observable, roo_fl, roo_afb)
-
-        self.roo_pdf = ROOT.RooGenericPdf(self.name, formula, arglist_params)
-
-
-class Fl(PDF):
-    """ Forward backward asymmetry Pdf
-
-    """
-    def __init__(self,
-                 observable,
-                 FL=Var("FL", val=0.4, lwb=0, upb=1),
-                 name='fl_model',
-                 **kwds):
-        """
-
-        Args:
-            observable (str) or (RooRealVar) or (list): Observable for the pdf
-            FL (Optional[RooRealVar]): Optional override for the FL measure
-                Can be used for simultaneous fitting
-        """
-        self.initial_FL = FL
-        super(Fl, self).__init__(name=name, observables=[observable], **kwds)
-
-    def init_pdf(self):
-        roo_observable = self.get_observable()
-
-        roo_fl = self._add_parameter(self.initial_FL,)
-
-        observable_name = roo_observable.GetName()
-        fl_name = roo_fl.GetName()
-
-        formula_template = "(3/2.0)*{FL}*({x}*{x})+(3/4.0)*(1-{FL})*(1-{x}*{x})"
-        formula = formula_template.format(x=observable_name, FL=fl_name)
-
-        arglist_params = ROOT.RooArgList(roo_observable, roo_fl,)
-
-        self.roo_pdf = ROOT.RooGenericPdf(self.name, formula, arglist_params)
-
-
-class At(PDF):
-    """ Forward backward asymmetry Pdf
-
-    """
-
-    def __init__(self,
-                 observable,
-                 AT=Var("AT", val=0.0, lwb=-10, upb=10),
-                 AI=Var("AI", val=0.0, lwb=-10, upb=10),
-                 FL=Var("FL", val=0.4, lwb=0, upb=1),
-                 name='At_model',
-                 **kwds):
-        """
-
-        Args:
-            observable (str) or (RooRealVar) or (list): Observable for the pdf
-            FL (Optional[RooRealVar]): Optional override for the FL measure
-                Can be used for simultaneous fitting
-        """
-        self.initial_AT = AT
-        self.initial_AI = AI
-        self.initial_FL = FL
-        super(At, self).__init__(name=name, observables=[observable], **kwds)
-
-    def init_pdf(self):
-        roo_observable = self.get_observable()
-
-        roo_at = self._add_parameter(self.initial_AT, )
-        roo_ai = self._add_parameter(self.initial_AI, )
-        roo_fl = self._add_parameter(self.initial_FL, )
-
-        observable_name = roo_observable.GetName()
-        at_name = roo_at.GetName()
-        ai_name = roo_ai.GetName()
-        fl_name = roo_fl.GetName()
-
-        formula_template = "(1/(2.0*3.14159265359))*(1+0.5*(1-{FL})*{AT}*cos(2*{x})+{AI}*sin(2*{x}))"
-        formula = formula_template.format(x=observable_name, AT=at_name, AI=ai_name, FL=fl_name)
-
-        arglist_params = ROOT.RooArgList(roo_observable, roo_fl, roo_ai, roo_at)
-
-        self.roo_pdf = ROOT.RooGenericPdf(self.name, formula, arglist_params)

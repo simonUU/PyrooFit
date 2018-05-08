@@ -13,9 +13,9 @@ Examples
         def __init__(self, x, param, name='MyPDF'):
             super(MyPDF, self).__init__(name=name, **kwds)
 
-            self._add_observable("x", x)
+            self.add_observable(x)
 
-            self._add_parameter("param1" param)
+            self.add_parameter(param)
 
             self.roo_pdf = ROOT.MyPDF(self.name, self.title, self.observables('x'), self.parameters.para1)
 
@@ -25,10 +25,10 @@ Examples
 
 from __future__ import print_function
 
-from .utilities import ClassLoggingMixin, AttrDict, check_kwds
+from .utilities import ClassLoggingMixin, AttrDict
 from .data import df2roo
-from .dirty.plotting import pull_plot
-from .observables import Var, create_roo_variable
+from .plotting import pull_plot
+from .observables import create_roo_variable
 
 import ROOT
 from uncertainties import ufloat
@@ -50,10 +50,11 @@ class PDF(ClassLoggingMixin, object):
         self.observables = AttrDict()
         if observables:
             for observable in observables:
-                self._add_observable(observable)
+                self.add_observable(observable)
 
         #: dict(str->ROOT.RooRealVar) - Fitted parameters from the fit procedure
-        self.params = AttrDict()
+        self.parameters = AttrDict()
+        self.parameter_names = AttrDict()
 
         #: RooAbsPDF
         self.roo_pdf = None
@@ -77,40 +78,51 @@ class PDF(ClassLoggingMixin, object):
         return AddPdf([self, other])
 
     def __mul__(self, other):
-        from .composits import  ProdPdf
+        from .composits import ProdPdf
         return ProdPdf([self, other])
 
     def init_pdf(self):
         """ Initiate attributes for parameters
 
         """
-        for p in self.params:
-            self.__setattr__(p, self.params[p])
+        for p in self.parameters:
+            self.__setattr__(p, self.parameters[p])
 
-    def _add_parameter(self, param_var, param_name=None, name=None, **kwds):
-        """ Internal method to add a parameter to the pdf
+    def add_parameter(self, param_var, param_name, final_name=None, **kwds):
+        """ Add Parameter
 
-        Args:
-            param_var:
-            param_name:
-            name:
-            **kwds:
+        Parameters
+        ----------
+        param_name
+        param_var
+        final_name
+        kwds
 
-        Returns:
-
+        Returns
+        -------
+        RooRealVar
+            converted RooRealVar
         """
-        roo_param = create_roo_variable(param_var, name=name, param_name=param_name, **kwds)
-        if param_name is None:
-            param_name = roo_param.GetName()
-        self.params[param_name] = roo_param
-        self.__setattr__(param_name, roo_param)
-        return roo_param
 
-    def _add_observable(self, observable_var, **kwds):
+        if final_name is None:
+            name = self.name + '_' + param_name
+        else:
+            name = final_name
+        roo_param = create_roo_variable(param_var, name=name, **kwds)
+        self.parameters[param_name] = roo_param
+        self.__setattr__(param_name, roo_param)
+        return self.parameters[param_name]
+
+    def add_observable(self, observable_var, **kwds):
+
+        if isinstance(observable_var, list) or isinstance(observable_var, tuple):
+            if not isinstance(observable_var[0], str):
+                print("WARNING : choosing automatic variable name 'x'")
+
         roo_observable = create_roo_variable(observable_var, **kwds)
         name = roo_observable.GetName()
         self.observables[name] = roo_observable
-        return roo_observable
+        return self.observables[name]
 
     def get_fit_data(self, df, weights=None, observables=None):
         """ Transforms DataFrame to a RooDataSet
@@ -123,7 +135,7 @@ class PDF(ClassLoggingMixin, object):
         """
         if observables is None:
             observables = self.observables
-        roo_data = df2roo(df, columns=observables, weights=weights)
+        roo_data = df2roo(df, observables=observables, weights=weights)
         return roo_data
 
     def fit(self, df, weights=None, observables=None):
@@ -167,8 +179,6 @@ class PDF(ClassLoggingMixin, object):
                                            ROOT.RooFit.Minos(self.use_minos),
                                            ROOT.RooFit.Hesse(self.use_hesse),)
 
-
-
     def plot(self, filename, data=None, observable=None, *args, **kwargs):
         """ Default Plot function
 
@@ -188,7 +198,7 @@ class PDF(ClassLoggingMixin, object):
         if data is not None:
             import pandas as pd
             if isinstance(data, pd.DataFrame):
-                data = self.get_fit_data(data, observable)
+                data = self.get_fit_data(data)
 
         # suffix
         suffix = filename.split('.')[-1]
@@ -231,7 +241,7 @@ class PDF(ClassLoggingMixin, object):
         pull_plot(self.roo_pdf, data, observable, filename, *args, **kwargs)
 
     def _get_var(self, v):
-        mes = self.params[v]
+        mes = self.parameters[v]
         val = mes.getVal()
         # Now catch RooFormulaVar
         try:
@@ -255,7 +265,7 @@ class PDF(ClassLoggingMixin, object):
         """
 
         if parameter is None:
-            for m in self.params:
+            for m in self.parameters:
                 print('{0:18} ==> {1}'.format(m, self._get_var(m)))
         else:
             return self._get_var(parameter)
@@ -280,9 +290,9 @@ class PDF(ClassLoggingMixin, object):
         Returns:
 
         """
-        for m in self.params:
+        for m in self.parameters:
             self.logger.debug("Setting %s constant" % m)
-            self.params[m].setConstant(constant)
+            self.parameters[m].setConstant(constant)
 
     def constrain(self, sigma):
         """ Constrain parameters within given significance
@@ -294,25 +304,25 @@ class PDF(ClassLoggingMixin, object):
         Returns:
 
         """
-        for m in self.params:
-            cent = self.params[m].getVal()
-            err = self.params[m].getError()
-            self.params[m].setMin(cent-sigma*err)
-            self.params[m].setMax(cent + sigma * err)
+        for m in self.parameters:
+            cent = self.parameters[m].getVal()
+            err = self.parameters[m].getError()
+            self.parameters[m].setMin(cent - sigma * err)
+            self.parameters[m].setMax(cent + sigma * err)
 
     def narrow(self, sigma):
         """ Narrows all parameters within one sigma of the original definition"""
-        for m in self.params:
-            l = self.params[m].getMin()
-            h = self.params[m].getMax()
-            v = self.params[m].getVal()
-            e = self.params[m].getError()
+        for m in self.parameters:
+            l = self.parameters[m].getMin()
+            h = self.parameters[m].getMax()
+            v = self.parameters[m].getVal()
+            e = self.parameters[m].getError()
 
             new_h = v+sigma*e if v+sigma*e < h else h
             new_l = v - sigma * e if v - sigma * e > l else l
 
-            self.params[m].setMax(new_h)
-            self.params[m].setMin(new_l)
+            self.parameters[m].setMax(new_h)
+            self.parameters[m].setMin(new_l)
 
     def randomize_pdf(self, frac=1/6., exceptions=None, only=None):
         """ Randomize parameters of a pdf
@@ -322,22 +332,22 @@ class PDF(ClassLoggingMixin, object):
             frac: with of the Gauss added to each member
         """
         import random
-        params = self.params if only is None else only
+        params = self.parameters if only is None else only
         for m in params:
             if exceptions is not None:
                 if m in exceptions:
                     continue
             try:
-                max_ = self.params[m].getMax()
-                min_ = self.params[m].getMin()
+                max_ = self.parameters[m].getMax()
+                min_ = self.parameters[m].getMin()
                 dist = abs(max_ - min_)
                 to_add = random.normalvariate(0, dist * frac)
-                val = self.params[m].getVal()
+                val = self.parameters[m].getVal()
                 if min_ < (val + to_add) < max_:
                     # only a small gaussian blur
-                    self.params[m].setVal(val + to_add)
+                    self.parameters[m].setVal(val + to_add)
                 else:
-                    self.params[m].setVal(random.uniform(min_, max_))
+                    self.parameters[m].setVal(random.uniform(min_, max_))
             except AttributeError:
                 self.logger.error("Unable to randomize parameter " + m)
 
@@ -365,7 +375,7 @@ class PDF(ClassLoggingMixin, object):
 
         params = only
         if only is None:
-            params = [p for p in self.params]
+            params = [p for p in self.parameters]
 
         for p in params:
             if exceptions is not None:
@@ -373,13 +383,13 @@ class PDF(ClassLoggingMixin, object):
                     continue
             if ignore_n and 'n_' in p:
                 continue
-            p_err = self.params[p].getError()
+            p_err = self.parameters[p].getError()
             if assym:
-                p_err = min(abs(self.params[p].getErrorHi()), abs(self.params[p].getErrorLo()))
+                p_err = min(abs(self.parameters[p].getErrorHi()), abs(self.parameters[p].getErrorLo()))
             if not err_lim_low < p_err < err_lim_high:
                 passing = False
                 suspect = p
-                suspect_value = self.params[p].getVal()
+                suspect_value = self.parameters[p].getVal()
                 suspect_error = p_err
                 break
 
@@ -400,13 +410,13 @@ class PDF(ClassLoggingMixin, object):
 
         """
         ret = {}
-        for p in self.params:
+        for p in self.parameters:
 
             if par_name is not None:
                 if par_name not in p:
                     continue
 
-            par = self.params[p]
+            par = self.parameters[p]
 
             ret[p] = [par.getVal(), par.getError(), par.getMin(), par.getMax()]
 
@@ -425,9 +435,9 @@ class PDF(ClassLoggingMixin, object):
 
         print(p)
 
-        assert p in self.params.keys(), 'Parameter not found'
+        assert p in self.parameters.keys(), 'Parameter not found'
 
-        par = self.params[p]
+        par = self.parameters[p]
         if not isinstance(params, list):
             params = [params]
         if len(params) == 1:
@@ -460,7 +470,7 @@ class PDF(ClassLoggingMixin, object):
                 continue
             name_remote = ps1[-1]
 
-            for sp in self.params:
+            for sp in self.parameters:
                 ps2 = sp.split('_')
                 if not len(ps2) >= 2:
                     self.warn("Parameter %s can not be set" % sp)

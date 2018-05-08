@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 
 
-def df2roo(df, columns=None, name='data', weights=None, ownership=True):
+def df2roo(df, columns=None, observables=None, name='data', weights=None, ownership=True):
     """Convert a DataFrame into a RooDataSet
     The `column` parameters select features of the DataFrame which should be included in the RooDataSet.
 
@@ -42,18 +42,19 @@ def df2roo(df, columns=None, name='data', weights=None, ownership=True):
 
     # TODO Convert Numpy Array
     if not isinstance(df, pd.DataFrame):
+        print("Did not receive DataFrame")
         df = pd.DataFrame(df)
-        print(df)
 
     # Gather columns in the DataFrame to be included in the rooDataSet
     if columns is None:
         if observables is not None:
             columns = [observables[v].GetName() for v in observables]
-    elif columns is not None:
+    if columns is not None:
         for v in columns:
             assert v in df.columns, "Variable %s not in DataFrame" % v
     else:
         columns = df.columns
+
     df_subset = df[columns]
 
     # Add weights into roofit format

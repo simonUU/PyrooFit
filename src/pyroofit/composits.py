@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """ Allowing simulataneous fitting.
 
+
+    Todo: This needs more work, just barely working
 """
 
 
 from .pdf import PDF
 from .utilities import AttrDict, is_iterable
-from .observables import Var, create_roo_variable
-from .dirty.plotting import pull_plot2, pull_plot
+from .observables import create_roo_variable
+from .plotting import pull_plot2, pull_plot
 from .data import df2roo
 
 import ROOT
@@ -17,7 +19,7 @@ class AddPdf(PDF):
     """ Add PDF class, for generic addition of pdfs
 
     """
-    def __init__(self, pdfs=None, name=None, norms=None, **kwds):
+    def __init__(self, pdfs=None, name=None, **kwds):
 
         self.pdfs = AttrDict()
         self.first_pdf = None  # remember which was passed first to identify signal in plotting
@@ -66,31 +68,31 @@ class AddPdf(PDF):
         # but hold on to at least one reference to avoid deletion
         old_norms = self.norms
         old_observables = self.observables
-        old_params = self.params
+        old_params = self.parameters
 
         # only reset observables if not already set
         # >> the user could change them intentionally
         if self.norms is None:
             self.norms = AttrDict()
             self.observables = AttrDict()
-            self.params = AttrDict()
+            self.parameters = AttrDict()
 
         argset_norm = ROOT.RooArgList()
         argset_roo_pdf = ROOT.RooArgList()
 
         for pdf_name, pdf in self.pdfs.items():
             if pdf_name not in self._external_norms:
-                norm_var = Var('n_'+pdf_name, val=10, lwb=0, upb=1000000)
+                norm_var = ('n_'+pdf_name, 10, 0, 1000000)
                 roo_norm = create_roo_variable(norm_var)
             else:
                 roo_norm = self._external_norms[pdf_name]
             self.norms[pdf_name] = roo_norm
-            self.params['n_'+pdf_name] = roo_norm
+            self.parameters['n_' + pdf_name] = roo_norm
             argset_norm.add(roo_norm)
             argset_roo_pdf.add(pdf.roo_pdf)
 
             self.observables.update(pdf.observables)
-            self.params.update(pdf.params)
+            self.parameters.update(pdf.parameters)
         #self.params.update(self.norms)
 
         name = self.name
@@ -153,17 +155,17 @@ class ProdPdf(PDF):
         # Discard old observables and params
         # but hold on to at least one reference to avoid deletion
         old_observables = self.observables
-        old_params = self.params
+        old_params = self.parameters
 
         self.observables = AttrDict()
-        self.params = AttrDict()
+        self.parameters = AttrDict()
 
         argset_roo_pdf = ROOT.RooArgList()
 
         for pdf_name, pdf in self.pdfs.items():
 
             self.observables.update(pdf.observables)
-            self.params.update(pdf.params)
+            self.parameters.update(pdf.parameters)
 
             if pdf.roo_pdf is None:
                 self.warn("Pdf is None")
@@ -193,15 +195,15 @@ class Convolution(PDF):
 
     def init_pdf(self):
         old_observables = self.observables
-        old_params = self.params
+        old_params = self.parameters
         self.observables = AttrDict()
-        self.params = AttrDict()
+        self.parameters = AttrDict()
 
         self.observables.update(self.pdf1.observables)
         self.observables.update(self.pdf2.observables)
 
-        self.params.update(self.pdf1.params)
-        self.params.update(self.pdf2.params)
+        self.parameters.update(self.pdf1.parameters)
+        self.parameters.update(self.pdf2.parameters)
 
         if len(self.observables) != 1:
             raise NotImplemented("Currently support one dimensional convolutions")
@@ -243,7 +245,7 @@ class SimFit(PDF):
             self.pdf_names.append(pdf.name)
             self.sample.defineType(pdf.name)
             self.observables.update(pdf.observables)
-            self.params.update(pdf.params)
+            self.parameters.update(pdf.parameters)
 
         self.roo_pdf = ROOT.RooSimultaneous("simPdf", "simultaneous pdf", self.sample)
 

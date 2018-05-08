@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from pyroofit.data import df2roo
 
 import pandas as pd
 import numpy as np
 import ROOT
 
-from pyroofit.pdf import AddPdf, ProdPdf, Convolution, Var
 from pyroofit.models import Gauss, Chebychev
 
 
@@ -19,58 +17,34 @@ def get_test_df(size=100):
     return pd.DataFrame(d)
 
 
-def test_PDF_init_Var():
-    pdf = Chebychev(Var('mbc', lwb=0, upb=1))
-    assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
-
-
 def test_PDF_init_list():
     pdf = Chebychev(['mbc', 0, 1])
     assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
 
 
-def test_PDF_init_str():
-    pdf = Chebychev('mbc')
+def test_PDF_init_RooRealVar():
+    x = ROOT.RooRealVar('mbc', '', 0, 0, 1)
+    pdf = Chebychev(x)
     assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
 
 
-def test_AddPdf():
-    df = get_test_df()
-    assert isinstance(df, pd.DataFrame)
-    bkg = Chebychev(Var('mbc', lwb=0, upb=1))
-    sig = Gauss(Var('mbc', lwb=0, upb=1))
+def test_PDF_Gauss():
+    x = ROOT.RooRealVar('mbc', '', 0, 0, 1)
+    pdf = Gauss(x)
+    assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
 
-    pdf = sig+bkg
 
+def test_PDF_Chebychev():
+    x = ROOT.RooRealVar('mbc', '', 0, 0, 1)
+    pdf = Chebychev(x, n=10)
+    assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
+
+"""
+def test_fit():
+    x = ROOT.RooRealVar('mbc', '', 0, 0, 1)
+    pdf = Gauss(x)
+    df = get_test_df(100)
     pdf.fit(df)
-    pdf.plot('test2.pdf')
-
-    assert isinstance(pdf, AddPdf)
     assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
-
-
-def test_ProdPdf():
-    df = get_test_df()
-    assert isinstance(df, pd.DataFrame)
-
-    bkg = Chebychev(Var('mbc', lwb=0, upb=1))
-    sig = Gauss(Var('mbc', lwb=0, upb=1))
-
-    pdf = sig*bkg
-
-    assert isinstance(pdf, ProdPdf)
-    assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
-
-
-def test_Convolution():
-    df = get_test_df()
-    assert isinstance(df, pd.DataFrame)
-    bkg = Chebychev(Var('mbc', lwb=0, upb=1))
-    sig = Gauss(Var('mbc', lwb=0, upb=1))
-
-    pdf = Convolution(bkg, sig)
-
-    assert isinstance(pdf, Convolution)
-    assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
-
+"""
 
