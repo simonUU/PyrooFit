@@ -10,38 +10,37 @@ import ROOT
 from .utilities import AttrDict, check_kwds, is_iterable
 
 
-def create_variable(name, lwb, upb, val=None, title=None, unit=None):
-    """ fast way to create a variable
+def create_variable(name, min, max, val=None, title=None, unit=None):
+    """ Fast method to create a RooRealVar
 
-    Args:
-        name:
-        lwb:
-        upb:
-        val:
-        title:
-        unit:
+    Parameters
+    ----------
+    name
+    min
+    max
+    val
+    title
+    unit
 
-    Returns:
-        RooRealVar
+    Returns
+    -------
+    RooRealVar
+
     """
     if val is None:
-        val = (lwb + upb)/2.
-    return create_roo_variable(name=name, lwb=lwb, upb=upb, val=val, title=title, unit=unit)
+        if min > max:
+            print("WARNING min > max")
+        val = (min + max)/2.
+    return create_roo_variable(name=name, min=min, max=max, val=val, title=title, unit=unit)
 
 
-
-class Var:
-    def __init__(self, name=None, min=0, max=1, value=None, title=None, unit=None):
-        self.name = name
-        self.min = min
-        self.max = max
-        self.value = value if value is not None else (min + max)/2.
-        self.title = title
-        self.unit = unit
-
-    def roo(self):
-        name = self.name if self.name is not None else "X"
-        return ROOT.RooRealVar(name, self.title, self.value, self.min, self.max, self.unit)
+class Var(AttrDict):
+    @check_kwds(["title", "min", "max", "val", "unit"])
+    def __init__(self, name=None, **kwds):
+        if name is None:
+            super(Var, self).__init__(**kwds)
+        else:
+            super(Var, self).__init__(name=name, **kwds)
 
 
 @check_kwds(["title", "min", "max", "val", "unit"])
@@ -114,9 +113,9 @@ def create_roo_variable(var=None,
             name, lwb, upb = var
             val = (lwb + upb) / 2.
         elif len(var) == 4:
-            name, val, lwb, upb = var
+            name, lwb, upb, val = var
         else:
-            assert False, "pleas give variables in the form of [name, lwb, upd]"
+            assert False, "pleas give variables in the form of [name, min, max, (val)]"
         if title is None:
             title = name
         return ROOT.RooRealVar(name, title, val, lwb, upb, unit)

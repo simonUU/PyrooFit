@@ -21,11 +21,35 @@ x = ['x', -3, 3]
 pdf = Gauss(x, mean=[-1,1])
 pdf.fit(data)
 pdf.plot('example.pdf')
+pdf.get()
 
 ```
 
+A more complex example on combination of Gauss pdf for signal and Polynomial for background:
+
+```sh
+import pyroofit
+from pytoofit.models import Gauss, Chebychev
+import numpy as np
+import pandas as pd
+d = {}
+d['mass'] = np.append(np.random.random_sample(1000)*6 -3,
+                      np.random.normal(0, 1, 1000))
+df = pd.DataFrame(df)
 
 
+x = pyroofit.create_variable(name='mass', min=-3, max=3, unit='GeV')
+
+pdf_sig = Gauss(x, mean=[-1,1])
+pdf_bkg = Chebychev(x,n=1)
+
+pdf = pdf_sig + pdf_bkg
+
+pdf.fit(df)
+pdf.plot('example2.pdf')
+pdf.get()
+
+```
 
 Installation
 ============
