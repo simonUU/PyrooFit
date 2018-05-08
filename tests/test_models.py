@@ -40,5 +40,6 @@ def test_Mbc():
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     pdf = Mbc(Var('mbc', lwb=0, upb=1))
+
     pdf.observables.mbc # test that mbc is available by attribute lookup
     assert isinstance(pdf.roo_pdf, ROOT.RooAddPdf)

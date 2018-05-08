@@ -14,7 +14,7 @@ Simple fit and plot of a Gaussian Distribution:
 from pytoofit.models import Gauss
 import numpy as np
 
-data = np.random.normal(mu, sigma, 1000)
+data = np.random.normal(0, 1, 1000)
 
 x = ['x', -3, 3]
 
@@ -25,14 +25,13 @@ pdf.plot('example.pdf')
 ```
 
 
-Description
-===========
-
-Fitting RooFit object to pandas DataFrames
 
 
 Installation
 ============
+
+Dependencies: ROOT (with PyRoot enabled)
+
 
 * Download this repository
 

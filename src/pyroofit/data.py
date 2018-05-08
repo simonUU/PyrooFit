@@ -12,22 +12,29 @@ import numpy as np
 
 
 def df2roo(df, columns=None, name='data', weights=None, ownership=True):
-    """ Convert a DataFrame into a RooDataSet
+    """Convert a DataFrame into a RooDataSet
+    The `column` parameters select features of the DataFrame which should be included in the RooDataSet.
 
-    The `column`s and `observables` parameters select features of the DataFrame which should be included in
-    the RooDataSet.
+    Parameters
+    ----------
+    df : DataFrame or array
+        Input data to be transformed to a RooDataSet
+    columns : :obj:`list` of :obj:`str`, optional
+        List of column names of the DataFrame
+    name : :obj:`str`
+        Name of the Dataset should be unique to avoid problems with ROOT
+    weights : :obj:`str` or array, optional
+        Name or values of weights to assign weights to the RooDataSet
+    ownership : bool, optional
+        Experimental, True for ROOT garbage collection
 
-    Args:
-        df (DataFrame):
-        columns (str or :obj:`list` of :obj:`str`): Column(s) if the dataframe to be included to the RooDataSet
-        name (str):  Internal name of the rooDataSet
-        weights (array): Array of weights, has to have equal length as the DataFrame
-        ownership (bool): Experimental, True for ROOT garbage collection
-
-    Returns:
-        RooDataSet
+    Returns
+    -------
+    RooDataSet
+        A conversion of the DataFrame
 
     """
+
 
     # Return DataFrame object
     if isinstance(df, ROOT.RooDataSet):

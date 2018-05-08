@@ -14,20 +14,19 @@ from .observables import Var, create_roo_variable
 import ROOT
 
 
-
 class Gauss(PDF):
     """ Standard gaussian
 
     """
     def __init__(self,
                  observable,
-                 mean=Var(name='mean', lwb=-1, upb=1),
-                 sigma=Var(name='sigma', lwb=0, upb=1),
+                 mean=Var(min=-1, max=1),
+                 sigma=Var(min=0, max=1),
                  name='gauss_sig',
                  title='Gaussian PDF',
                  **kwds):
 
-        super(Gauss, self).__init__(name=name, **kwds)
+        super(Gauss, self).__init__(name=name, title=title, **kwds)
 
         self._add_observable(observable)
 
@@ -47,7 +46,7 @@ class BifurGauss(PDF):
                  mean=Var(lwb=-1, upb=1),
                  sigmaL=Var(lwb=0, upb=1),
                  sigmaR=Var(lwb=0, upb=1),
-                 name='bifurgauss_sig', **kwds):
+                 name='BifurGauss', **kwds):
 
         super(BifurGauss, self).__init__(name=name, **kwds)
 
@@ -71,7 +70,7 @@ class BreitWigner(PDF):
                  observable,
                  mean=Var(lwb=-1, upb=1),
                  sigma=Var(lwb=0, upb=1),
-                 name='BreitWigner_sig', **kwds):
+                 name='BreitWigner', **kwds):
 
         super(BreitWigner, self).__init__(name=name, **kwds)
 

@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
 """ Observables
 
-    Involves ROOT - hence it is ugly
+    Interface to RooRealVar objects.
 
 """
 
 import ROOT
 
-from .utilities import AttrDict, check_kwds
-
-""" Some Predefined observables
-"""
-default_observables = {
-    'mbc': ROOT.RooRealVar("mbc", "M_{bc}", 5.27, 5.22, 5.289, "GeV/c^{2}"),
-    'mbc2': ROOT.RooRealVar("mbc2", "M_{bc}", 5.27, 5.22, 5.289, "GeV/c^{2}"),
-    #'phi': ROOT.RooRealVar("phi", "#phi", 0, ROOT.TMath.Pi(), "rad"),
-}
+from .utilities import AttrDict, check_kwds, is_iterable
 
 
 def create_variable(name, lwb, upb, val=None, title=None, unit=None):
@@ -37,13 +29,48 @@ def create_variable(name, lwb, upb, val=None, title=None, unit=None):
     return create_roo_variable(name=name, lwb=lwb, upb=upb, val=val, title=title, unit=unit)
 
 
-class Var(AttrDict):
-    @check_kwds(["title", "lwb", "upb", "val", "unit"])
-    def __init__(self, name=None, **kwds):
-        if name is None:
-            super(Var, self).__init__(**kwds)
-        else:
-            super(Var, self).__init__(name=name, **kwds)
+
+class Var:
+    def __init__(self, name=None, min=0, max=1, value=None, title=None, unit=None):
+        self.name = name
+        self.min = min
+        self.max = max
+        self.value = value if value is not None else (min + max)/2.
+        self.title = title
+        self.unit = unit
+
+    def roo(self):
+        name = self.name if self.name is not None else "X"
+        return ROOT.RooRealVar(name, self.title, self.value, self.min, self.max, self.unit)
+
+
+@check_kwds(["title", "min", "max", "val", "unit"])
+def to_var(var, **kwds):
+    """ Fast conversion from list to Variable
+
+    Parameters
+    ----------
+    var : list or dict
+        List or dictionary containing the variable like ['name', min, max]
+    kwds
+
+    Returns
+    -------
+
+    """
+    if isinstance(var, list):
+        name = val = lwb = upb = None
+        if len(var) == 2:
+            lwb, upb = var
+            val = (lwb + upb)/2.
+        elif len(var) == 3:
+            name, lwb, upb = var
+            val = (lwb + upb) / 2.
+        elif len(var) == 4:
+            name, val, lwb, upb = var
+        return Var(name, lwb, upb, val)
+    else:
+        return Var(**kwds)
 
 
 def create_roo_variable(var=None,
@@ -68,9 +95,6 @@ def create_roo_variable(var=None,
     Returns:
 
     """
-
-    if isinstance(var, str):
-        var = default_observables.get(var, Var(var))
 
     if isinstance(var, ROOT.RooRealVar):
         return var
