@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 
 
-def df2roo(df, columns=None, observables=None, name='data', weights=None, ownership=True):
+def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True):
     """Convert a DataFrame into a RooDataSet
     The `column` parameters select features of the DataFrame which should be included in the RooDataSet.
 
@@ -19,6 +19,8 @@ def df2roo(df, columns=None, observables=None, name='data', weights=None, owners
     ----------
     df : DataFrame or array
         Input data to be transformed to a RooDataSet
+    observables : dict
+        Dictionary of observables to convert data with the correct range of the observables of interest
     columns : :obj:`list` of :obj:`str`, optional
         List of column names of the DataFrame
     name : :obj:`str`
@@ -35,7 +37,6 @@ def df2roo(df, columns=None, observables=None, name='data', weights=None, owners
 
     """
 
-
     # Return DataFrame object
     if isinstance(df, ROOT.RooDataSet):
         return df
@@ -43,7 +44,11 @@ def df2roo(df, columns=None, observables=None, name='data', weights=None, owners
     # TODO Convert Numpy Array
     if not isinstance(df, pd.DataFrame):
         print("Did not receive DataFrame")
-        df = pd.DataFrame(df)
+        assert observables is not None, "Did not receive an observable "
+        assert len(observables) == 1, "Can only handle 1d array, use pd.DataFrame instead"
+        assert len(np.array(df).shape) == 1, "Can only handle 1d array, use pd.DataFrame instead"
+        d = {list(observables.keys())[0]: np.array(df)}
+        df = pd.DataFrame(d)
 
     # Gather columns in the DataFrame to be included in the rooDataSet
     if columns is None:

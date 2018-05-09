@@ -9,7 +9,7 @@
 from .pdf import PDF
 from .utilities import AttrDict, is_iterable
 from .observables import create_roo_variable
-from .plotting import pull_plot2, pull_plot
+from .plotting import fast_plot
 from .data import df2roo
 
 import ROOT
@@ -109,7 +109,7 @@ class AddPdf(PDF):
         for pdf_name, pdf in self.pdfs.items():
             sig_norm = self.norms[pdf_name]
             components.append((pdf.roo_pdf, sig_norm.getVal()))
-        pull_plot2(self.roo_pdf, data, observable, filename, components=components, *args, **kwargs)
+        fast_plot(self.roo_pdf, data, observable, filename, components=components, *args, **kwargs)
 
     """
         def _plot(self, filename, observable, data=None, *args, **kwargs):

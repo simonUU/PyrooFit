@@ -27,7 +27,7 @@ from __future__ import print_function
 
 from .utilities import ClassLoggingMixin, AttrDict
 from .data import df2roo
-from .plotting import pull_plot
+from .plotting import fast_plot
 from .observables import create_roo_variable
 
 import ROOT
@@ -64,7 +64,7 @@ class PDF(ClassLoggingMixin, object):
         self.last_fit = None
 
         # Fit options
-        self.use_minos = True
+        self.use_minos = False
         self.use_hesse = True
         self.use_extended = False
         self.use_sumw2error = True
@@ -135,6 +135,7 @@ class PDF(ClassLoggingMixin, object):
         """
         if observables is None:
             observables = self.observables
+
         roo_data = df2roo(df, observables=observables, weights=weights)
         return roo_data
 
@@ -238,7 +239,7 @@ class PDF(ClassLoggingMixin, object):
         """
         if data is None:
             data = self.last_data
-        pull_plot(self.roo_pdf, data, observable, filename, *args, **kwargs)
+        fast_plot(self.roo_pdf, data, observable, filename, *args, **kwargs)
 
     def _get_var(self, v):
         mes = self.parameters[v]

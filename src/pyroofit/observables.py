@@ -71,10 +71,11 @@ def create_roo_variable(var=None,
 
     # backward compatibility
     if isinstance(var, list) or isinstance(var, tuple):
-        name_tmp, lwb, upb, val = extract_from_list(var)
+        name_tmp, val, lwb, upb = extract_from_list(var)
         if name_tmp is not None:
             name = name_tmp
-    if title is None:
+
+    if title is '' or None:
         title = name
 
     return ROOT.RooRealVar(name, title, val, lwb, upb, unit)
