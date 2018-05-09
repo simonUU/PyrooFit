@@ -189,8 +189,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
             print(info)
             try:
                 if len(info) == 1:
-                    # TODO: legende
-                    pass
+                    box.AddText(info[0])
                 elif len(info) == 3:
                     box.AddText(info[0] + ' = %.2f #pm %.2f' % (info[1], info[2]))
                 else:

@@ -6,7 +6,7 @@ Version 0.9
 ===========
 
 - Deciding on a simple interface for observables and parameters
-- Plotting is still in beta 
+- Plotting is still in beta
 
 Version 0.0
 ===========
