@@ -2,9 +2,13 @@
 Changelog
 =========
 
-Version 0.1
+Version 0.9
 ===========
 
-- Feature A added
-- FIX: nasty bug #1729 fixed
-- add your changes here!
+- Deciding on a simple interface for observables and parameters
+- Plotting is still in beta 
+
+Version 0.0
+===========
+
+- Tested a lot of different approaches
