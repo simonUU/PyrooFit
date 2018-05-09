@@ -241,7 +241,7 @@ class PDF(ClassLoggingMixin, object):
             data = self.last_data
         fast_plot(self.roo_pdf, data, observable, filename, *args, **kwargs)
 
-    def _get_var(self, v):
+    def _get_var(self, v, as_ufloat=False):
         mes = self.parameters[v]
         val = mes.getVal()
         # Now catch RooFormulaVar
@@ -252,9 +252,11 @@ class PDF(ClassLoggingMixin, object):
                 err = mes.getPropagatedError(self.last_fit)
             except TypeError:
                 err = 0
+        if not as_ufloat:
+            return val, err
         return ufloat(val, err)
 
-    def get(self, parameter=None):
+    def get(self, parameter=None, as_ufloat=False):
         """ Get one of the fitted parameter or print all if None is set
 
         Args:
@@ -267,9 +269,9 @@ class PDF(ClassLoggingMixin, object):
 
         if parameter is None:
             for m in self.parameters:
-                print('{0:18} ==> {1}'.format(m, self._get_var(m)))
+                print('{0:18} ==> {1}'.format(m, self._get_var(m, True)))
         else:
-            return self._get_var(parameter)
+            return self._get_var(parameter, as_ufloat)
 
     def get_observable(self):
         """ Get the observables from self.observables

@@ -32,5 +32,6 @@ pdf_bkg = Chebychev(x, n=1)
 pdf = pdf_sig + pdf_bkg
 
 pdf.fit(df)
-pdf.plot('example_sig_bkg.pdf')
+pdf.plot('example_sig_bkg.pdf', nbins=4, extra_info=[["Legend"], ["More Legend"],
+                                            ['#mu', *pdf.get('mean')], ['#sigma', *pdf.get('sigma')]])
 pdf.get()

@@ -7,9 +7,14 @@
 
 """
 from __future__ import print_function
-
+from .utilities import  ClassLoggingMixin
 import ROOT
 
+
+class Plotter(ClassLoggingMixin):
+    def __init__(self):
+        super(Plotter, self).__init__()
+        pass
 
 def get_optimal_bin_size(n):
     """
@@ -53,7 +58,7 @@ DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
 
 def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
-              fill_cycle=DEFAULT_STYLES
+              fill_cycle=DEFAULT_STYLES, line_shade=0,
               ):
     """ Function to plot the PDF model 
      
@@ -92,14 +97,14 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         n_col = 0
         for c, ni in components:
             c.plotOn(frame,
-                     ROOT.RooFit.LineColor(color_cycle[n_col] + 1),
+                     ROOT.RooFit.LineColor(color_cycle[n_col]+line_shade),
                      ROOT.RooFit.Normalization(ni, 2),
                      ROOT.RooFit.FillColor(color_cycle[n_col]),
                      ROOT.RooFit.FillStyle(fill_cycle[n_col]),
                      ROOT.RooFit.DrawOption("F"))
 
             c.plotOn(frame,
-                     ROOT.RooFit.LineColor(color_cycle[n_col] + 1),
+                     ROOT.RooFit.LineColor(color_cycle[n_col]+line_shade),
                      ROOT.RooFit.Normalization(ni, 2),
                      ROOT.RooFit.FillColor(color_cycle[n_col]),
                      ROOT.RooFit.LineWidth(lw), )  # ROOT.RooFit.DrawOption("F")) #4050
@@ -186,8 +191,9 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         box.SetFillStyle(1001)
         box.SetFillColor(10)
         for info in extra_info:
-            print(info)
             try:
+                if not isinstance(info, list):
+                    info = [info]
                 if len(info) == 1:
                     box.AddText(info[0])
                 elif len(info) == 3:

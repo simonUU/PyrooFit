@@ -29,7 +29,7 @@ class ClassLoggingMixin(object):
         self.logger.info(self, msg)
 
     def warn(self, msg):
-        self.logger.warn(msg)
+        self.logger.warning(msg)
 
     def error(self, msg):
         self.logger.error(msg)
@@ -56,7 +56,7 @@ def check_kwds(keys):
     def decorator(func):
         """Decorator applying a check for valid keyword argument names to the function"""
         valid_keys = set(keys)
-        valid_keys.update(inspect.getargspec(func).args)
+        valid_keys.update(inspect.signature(func).args)
         @functools.wraps(func)
         def decorated(*args, **kwds):
             for key in kwds:
