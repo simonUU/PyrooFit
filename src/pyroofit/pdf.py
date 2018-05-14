@@ -124,7 +124,7 @@ class PDF(ClassLoggingMixin, object):
         self.observables[name] = roo_observable
         return self.observables[name]
 
-    def get_fit_data(self, df, weights=None, observables=None):
+    def get_fit_data(self, df, weights=None, observables=None, nbins=None):
         """ Transforms DataFrame to a RooDataSet
 
         Args:
@@ -136,20 +136,25 @@ class PDF(ClassLoggingMixin, object):
         if observables is None:
             observables = self.observables
 
-        roo_data = df2roo(df, observables=observables, weights=weights)
+        roo_data = df2roo(df, observables=observables, weights=weights, bins=nbins)
         return roo_data
 
-    def fit(self, df, weights=None, observables=None):
-        """ Fit the DataFrame to the PDF
+    def fit(self, df, weights=None, nbins=None):
+        """
 
-        Args:
-            df:
-            weights:
-            observables:
+        Parameters
+        ----------
+        df
+        weights
+        nbins
+
+        Returns
+        -------
 
         """
+
         self.logger.debug("Fitting")
-        self.last_data = self.get_fit_data(df, weights=weights, observables=observables)
+        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins)
         self._fit(self.last_data)
 
     def _before_fit(self, *args, **kwargs):

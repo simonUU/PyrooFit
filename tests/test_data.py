@@ -56,3 +56,11 @@ def test_df2roo_weights_columnname():
     df_roo = df2roo(df, weights='w')
     df_roo.Print()
     assert isinstance(df_roo, ROOT.RooDataSet)
+
+
+def test_roo2hist():
+    df = get_test_df()
+    df['w'] = np.random.uniform(0, 1, len(df))
+
+    hist = df2roo(df, columns=['col1'], bins=20)
+    assert isinstance(hist, ROOT.RooDataHist)
