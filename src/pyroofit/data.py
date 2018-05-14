@@ -10,8 +10,33 @@ import ROOT
 import pandas as pd
 import numpy as np
 
+def roo2hist(roo, binning, obs, name, observables=None):
+    """
 
-def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True):
+    Parameters
+    ----------
+    roo
+    binning
+    obs
+    name
+    observables
+
+    Returns
+    -------
+
+    """
+    obs.setBins(binning)
+    if observables is None:
+        observables = ROOT.RooArgSet()
+        observables.add(obs)
+
+    hist = ROOT.RooDataHist(name,"Data Hist", observables, ROOT.RooFit.Import(roo))
+
+    return hist
+
+
+
+def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True, bins=None):
     """Convert a DataFrame into a RooDataSet
     The `column` parameters select features of the DataFrame which should be included in the RooDataSet.
 
@@ -29,6 +54,8 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
         Name or values of weights to assign weights to the RooDataSet
     ownership : bool, optional
         Experimental, True for ROOT garbage collection
+    bins : int
+        creates RooDataHist instead with specified number of bins
 
     Returns
     -------
@@ -107,4 +134,8 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
     else:
         df_roo = ROOT.RooDataSet(name, name, roo_argset, ROOT.RooFit.Import(df_tree),)
     ROOT.SetOwnership(df_roo, ownership)
+
+    if bins is not None:
+        return roo2hist(df_roo, bins, observables[next(iter(observables))], name, observables)
+
     return df_roo

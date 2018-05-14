@@ -39,12 +39,18 @@ def test_PDF_Chebychev():
     pdf = Chebychev(x, n=10)
     assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
 
-"""
+
 def test_fit():
     x = ROOT.RooRealVar('mbc', '', 0, 0, 1)
     pdf = Gauss(x)
     df = get_test_df(100)
     pdf.fit(df)
     assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
-"""
 
+
+def test_fit_bins():
+    x = ROOT.RooRealVar('mbc', '', 0, 0, 1)
+    pdf = Gauss(x)
+    df = get_test_df(100)
+    pdf.fit(df, nbins=5)
+    assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
