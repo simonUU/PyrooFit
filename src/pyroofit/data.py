@@ -25,12 +25,14 @@ def roo2hist(roo, binning, obs, name, observables=None):
     -------
 
     """
+
     obs.setBins(binning)
+
     if observables is None:
         observables = ROOT.RooArgSet()
         observables.add(obs)
 
-    hist = ROOT.RooDataHist(name,"Data Hist", observables, ROOT.RooFit.Import(roo))
+    hist = ROOT.RooDataHist("Name","Data Hist", observables, roo)
 
     return hist
 
@@ -124,6 +126,7 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
     else:
         for v in observables:
             roo_argset.add(observables[v])
+            roo_var_list.append(observables[v])
 
     # Create final roofit data-set
     if weights is not None:
@@ -136,6 +139,6 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
     ROOT.SetOwnership(df_roo, ownership)
 
     if bins is not None:
-        return roo2hist(df_roo, bins, observables[next(iter(observables))], name, observables)
+        return roo2hist(df_roo, bins, roo_var_list[0], name, roo_argset)
 
     return df_roo
