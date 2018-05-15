@@ -88,6 +88,9 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     set_root_style(font_scale, label_scale)
 
     numbins = get_optimal_bin_size(data.numEntries()) if nbins is None else nbins
+    if isinstance(data, ROOT.RooDataHist):
+        numbins = z.getBins()
+
     frame = z.frame(ROOT.RooFit.Title("Fit Result"), ROOT.RooFit.Bins(numbins))
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
@@ -174,36 +177,41 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     else:
         plot_pulls.SetMinimum(-3.5)
         plot_pulls.SetMaximum(3.5)
-
-    plot_pulls.Draw("")
+    plot_pulls.SetMarkerStyle(6)
+    ROOT.gStyle.SetErrorX(0)  # This has to be the worst soloution
+    plot_pulls.Draw("AXIS")
     hist_pulls.SetFillColor(33)
     hist_pulls.SetLineColor(33)
     hist_pulls.Draw("HISTsame")
-    plot_pulls.Draw("same")
+    plot_pulls.Draw("Xsame")
 
     if extra_info is not None:
-        canvas.cd(1)
-        box = ROOT.TPaveText(0.2, 0.75, 0.4, 0.9, "NDC")
-        box.SetFillColor(10)
-        box.SetBorderSize(0)
-        box.SetTextAlign(12)
-        box.SetTextSize(0.04)
-        box.SetFillStyle(1001)
-        box.SetFillColor(10)
-        for info in extra_info:
-            try:
-                if not isinstance(info, list):
-                    info = [info]
-                if len(info) == 1:
-                    box.AddText(info[0])
-                elif len(info) == 3:
-                    box.AddText(info[0] + ' = %.2f #pm %.2f' % (info[1], info[2]))
-                else:
-                    print("Could not add to legend ", info)
-            except IndexError:
-                print("Something went wrong in plotting")
+        if isinstance(extra_info, ROOT.TPaveText):
+            box.Draw("Same")
+        else:
+            assert isinstance(extra_info, list), "Please provide extra_info with a list or ROOT.TPaveText"
+            canvas.cd(1)
+            box = ROOT.TPaveText(0.2, 0.75, 0.4, 0.9, "NDC")
+            box.SetFillColor(10)
+            box.SetBorderSize(0)
+            box.SetTextAlign(12)
+            box.SetTextSize(0.04)
+            box.SetFillStyle(1001)
+            box.SetFillColor(10)
+            for info in extra_info:
+                try:
+                    if not isinstance(info, list):
+                        info = [info]
+                    if len(info) == 1:
+                        box.AddText(info[0])
+                    elif len(info) == 3:
+                        box.AddText(info[0] + ' = %.2f #pm %.2f' % (info[1], info[2]))
+                    else:
+                        print("Could not add to legend ", info)
+                except IndexError:
+                    print("Something went wrong in plotting")
 
-        box.Draw("same")
+            box.Draw("same")
 
     canvas.SaveAs(filename)
 

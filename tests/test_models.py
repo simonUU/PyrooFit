@@ -6,7 +6,6 @@ from pyroofit.models import Argus, Mbc, Chebychev
 
 import pandas as pd
 import numpy as np
-import ROOT
 
 
 def get_test_df(size=100):
@@ -17,6 +16,7 @@ def get_test_df(size=100):
 
 
 def test_Argus():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     pdf = Argus(('mbc', 0, 1))
@@ -26,6 +26,7 @@ def test_Argus():
 
 
 def test_Chebychev():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     pdf = Chebychev(('mbc', 0, 1))
@@ -37,9 +38,11 @@ def test_Chebychev():
 
 
 def test_Mbc():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     pdf = Mbc(('mbc', 0, 1))
 
     pdf.observables.mbc # test that mbc is available by attribute lookup
     assert isinstance(pdf.roo_pdf, ROOT.RooAddPdf)
+

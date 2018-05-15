@@ -6,7 +6,6 @@ from pyroofit.data import df2roo
 
 import pandas as pd
 import numpy as np
-import ROOT
 
 
 def get_test_df(size=100):
@@ -17,6 +16,7 @@ def get_test_df(size=100):
 
 
 def test_df2roo():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     df_roo = df2roo(df)
@@ -24,6 +24,7 @@ def test_df2roo():
 
 
 def test_df2roo_columns():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     df_roo = df2roo(df, columns=['col1'])
@@ -31,6 +32,7 @@ def test_df2roo_columns():
 
 
 def test_df2roo_observables():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     obs = {}
@@ -41,6 +43,7 @@ def test_df2roo_observables():
 
 
 def test_df2roo_weights_array():
+    import ROOT
     df = get_test_df()
     w = np.random.uniform(0, 1, len(df))
 
@@ -50,6 +53,7 @@ def test_df2roo_weights_array():
 
 
 def test_df2roo_weights_columnname():
+    import ROOT
     df = get_test_df()
     df['w'] = np.random.uniform(0, 1, len(df))
 
@@ -59,8 +63,10 @@ def test_df2roo_weights_columnname():
 
 
 def test_roo2hist():
+    import ROOT
     df = get_test_df()
     df['w'] = np.random.uniform(0, 1, len(df))
 
     hist = df2roo(df, columns=['col1'], bins=20)
     assert isinstance(hist, ROOT.RooDataHist)
+

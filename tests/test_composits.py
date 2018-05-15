@@ -5,7 +5,6 @@ import pytest
 
 import pandas as pd
 import numpy as np
-import ROOT
 
 from pyroofit.models import Gauss, Chebychev
 from pyroofit.composits import AddPdf, ProdPdf, Convolution
@@ -19,6 +18,7 @@ def get_test_df(size=100):
 
 
 def test_AddPdf():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     bkg = Chebychev(('mbc', 0, 1))
@@ -34,6 +34,7 @@ def test_AddPdf():
 
 
 def test_AddPdf_fit():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     bkg = Chebychev(('mbc', 0, 1))
@@ -49,6 +50,7 @@ def test_AddPdf_fit():
 
 
 def test_ProdPdf():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
 
@@ -62,6 +64,7 @@ def test_ProdPdf():
 
 
 def test_Convolution():
+    import ROOT
     df = get_test_df()
     assert isinstance(df, pd.DataFrame)
     bkg = Chebychev(('mbc', 0, 1))
@@ -71,3 +74,4 @@ def test_Convolution():
 
     assert isinstance(pdf, Convolution)
     assert isinstance(pdf.roo_pdf, ROOT.RooAbsPdf)
+
