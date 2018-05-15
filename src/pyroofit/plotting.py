@@ -155,7 +155,10 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         pulls.SetPointEXlow(i, xerr)
         pulls.SetPointEXhigh(i, xerr)
 
-    plot_pulls.addPlotable(pulls, "PE1")
+        pulls.SetPointEYlow(i, 0)
+        pulls.SetPointEYhigh(i, 0)
+
+    plot_pulls.addPlotable(pulls, "*") #PE1")
     # Messy
     plot_pulls.GetYaxis().SetTitle("Pull")
     plot_pulls.GetYaxis().CenterTitle()
@@ -179,8 +182,8 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         plot_pulls.SetMinimum(-3.5)
         plot_pulls.SetMaximum(3.5)
     plot_pulls.SetMarkerStyle(6)
-    ROOT.gStyle.SetErrorX(0)  # This has to be the worst soloution
-    plot_pulls.Draw("AXIS")
+    plot_pulls.SetMarkerColor(0)  # This has to be the worst soloution
+    plot_pulls.Draw("")
     hist_pulls.SetFillColor(33)
     hist_pulls.SetLineColor(33)
     hist_pulls.Draw("HISTsame")
