@@ -201,7 +201,10 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
             for info in extra_info:
                 try:
                     if not isinstance(info, list):
-                        info = [info]
+                        if isinstance(info, ROOT.TPaveText):
+                            info.Draw('same')
+                        else:
+                            info = [info]
                     if len(info) == 1:
                         box.AddText(info[0])
                     elif len(info) == 3:

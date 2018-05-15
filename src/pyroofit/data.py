@@ -32,7 +32,7 @@ def roo2hist(roo, binning, obs, name, observables=None):
         observables = ROOT.RooArgSet()
         observables.add(obs)
 
-    hist = ROOT.RooDataHist("Name","Data Hist", observables, roo)
+    hist = ROOT.RooDataHist(name, "Data Hist", observables, roo)
 
     return hist
 
