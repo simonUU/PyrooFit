@@ -158,7 +158,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         pulls.SetPointEYlow(i, 0)
         pulls.SetPointEYhigh(i, 0)
 
-    plot_pulls.addPlotable(pulls, "*") #PE1")
+    plot_pulls.addPlotable(pulls, "PE1")
     # Messy
     plot_pulls.GetYaxis().SetTitle("Pull")
     plot_pulls.GetYaxis().CenterTitle()
