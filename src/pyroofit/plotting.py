@@ -58,7 +58,7 @@ DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
 
 def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
-              fill_cycle=DEFAULT_STYLES, line_shade=0,
+              fill_cycle=DEFAULT_STYLES, line_shade=0, style_fcn=set_root_style,
               ):
     """ Function to plot the PDF model 
      
@@ -84,8 +84,9 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     -------
 
     """
-
-    set_root_style(font_scale, label_scale)
+    
+    if style_fcn is not None:
+        set_root_style(font_scale, label_scale)
 
     numbins = get_optimal_bin_size(data.numEntries()) if nbins is None else nbins
     if isinstance(data, ROOT.RooDataHist):
