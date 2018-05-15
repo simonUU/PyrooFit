@@ -11,10 +11,23 @@ from .utilities import  ClassLoggingMixin
 import ROOT
 
 
+
+
+
 class Plotter(ClassLoggingMixin):
-    def __init__(self):
+    def __init__(self, pdf):
         super(Plotter, self).__init__()
-        pass
+        self.pdf = pdf
+        self.frame = None
+        self.create_frame()
+
+    def create_frame(self, title='', nbins=10):
+        # if nbins is None:
+        #     try:
+        #         nbins = get_optimal_bin_size(pdf.last_data.num)
+       self.frame =  self.pdf.get_observable().frame(ROOT.RooFit.Title(title), ROOT.RooFit.Bins(nbins))
+
+
 
 def get_optimal_bin_size(n):
     """
@@ -125,9 +138,11 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     canvas.GetPad(1).SetPad(0.0, 0.25, 1, 1)
     canvas.GetPad(1).SetBottomMargin(0.05)
     canvas.GetPad(1).SetRightMargin(0.05)
+    canvas.GetPad(1).SetTicks(1, 1)
     canvas.GetPad(2).SetPad(0.0, 0.0, 1, 0.25)
     canvas.GetPad(2).SetBottomMargin(0.32)
     canvas.GetPad(2).SetRightMargin(0.05)
+    canvas.GetPad(2).SetTicks(1, 1)
 
     # Pi label because of...
     if pi_label:
