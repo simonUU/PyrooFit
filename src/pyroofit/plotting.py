@@ -58,7 +58,7 @@ DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
 
 def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
-              fill_cycle=DEFAULT_STYLES, line_shade=0,
+              fill_cycle=DEFAULT_STYLES, line_shade=0, legend=False,
               ):
     """ Function to plot the PDF model 
      
@@ -95,7 +95,13 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
-
+    
+    if isinstance(legend, list):
+        assert len(legend) == 4, "Please provide four coordinates for the legend"
+        leg = ROOT.TLegend(*legend);
+    else:
+        leg = ROOT.TLegend(0.6,0.8,0.93,0.93);
+    
     if components is not None:
         n_col = 0
         for c, ni in components:
@@ -104,8 +110,9 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
                      ROOT.RooFit.Normalization(ni, 2),
                      ROOT.RooFit.FillColor(color_cycle[n_col]),
                      ROOT.RooFit.FillStyle(fill_cycle[n_col]),
+                     ROOT.RooFit.Name(c.GetName()),
                      ROOT.RooFit.DrawOption("F"))
-
+            leg.AddEntry(frame.findObject(c.GetName()), c.getTitle().Data())
             c.plotOn(frame,
                      ROOT.RooFit.LineColor(color_cycle[n_col]+line_shade),
                      ROOT.RooFit.Normalization(ni, 2),
@@ -114,10 +121,11 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
 
             n_col += 1
 
-
+    
+    
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-
+    
     # Create Canvas
     canvas = ROOT.TCanvas("plot", "plot", size, size)
     canvas.Divide(1, 2)
@@ -137,7 +145,9 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     # Draw All The Stuff
     canvas.cd(1)
     frame.Draw()
-
+    if legend is not False:
+        leg.Draw("same")
+    
     # Draw Pull
     canvas.cd(2)
     pulls = frame.pullHist("Data", "Model", average)
