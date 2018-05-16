@@ -11,10 +11,23 @@ from .utilities import  ClassLoggingMixin
 import ROOT
 
 
+
+
+
 class Plotter(ClassLoggingMixin):
-    def __init__(self):
+    def __init__(self, pdf):
         super(Plotter, self).__init__()
-        pass
+        self.pdf = pdf
+        self.frame = None
+        self.create_frame()
+
+    def create_frame(self, title='', nbins=10):
+        # if nbins is None:
+        #     try:
+        #         nbins = get_optimal_bin_size(pdf.last_data.num)
+       self.frame =  self.pdf.get_observable().frame(ROOT.RooFit.Title(title), ROOT.RooFit.Bins(nbins))
+
+
 
 def get_optimal_bin_size(n):
     """
@@ -84,7 +97,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     -------
 
     """
-
+    
     set_root_style(font_scale, label_scale)
 
     numbins = get_optimal_bin_size(data.numEntries()) if nbins is None else nbins
@@ -132,9 +145,11 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     canvas.GetPad(1).SetPad(0.0, 0.25, 1, 1)
     canvas.GetPad(1).SetBottomMargin(0.05)
     canvas.GetPad(1).SetRightMargin(0.05)
+    canvas.GetPad(1).SetTicks(1, 1)
     canvas.GetPad(2).SetPad(0.0, 0.0, 1, 0.25)
     canvas.GetPad(2).SetBottomMargin(0.32)
     canvas.GetPad(2).SetRightMargin(0.05)
+    canvas.GetPad(2).SetTicks(1, 1)
 
     # Pi label because of...
     if pi_label:
@@ -167,7 +182,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         pulls.SetPointEYlow(i, 0)
         pulls.SetPointEYhigh(i, 0)
 
-    plot_pulls.addPlotable(pulls, "*") #PE1")
+    plot_pulls.addPlotable(pulls, "PE1")
     # Messy
     plot_pulls.GetYaxis().SetTitle("Pull")
     plot_pulls.GetYaxis().CenterTitle()
