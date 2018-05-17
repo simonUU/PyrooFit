@@ -38,16 +38,18 @@ df = pd.DataFrame(df)
 
 x = ROOT.RooRealVar('mass', 'M', 0, -3, 3, 'GeV')
 
-pdf_sig = Gauss(x, mean=(-1, 1))
-pdf_bkg = Chebychev(x, n=1)
+pdf_sig = Gauss(x, mean=(-1, 1), title="Signal")
+pdf_bkg = Chebychev(x, n=1, title="Background")
 
 pdf = pdf_sig + pdf_bkg
 
 pdf.fit(df)
-pdf.plot('example_sig_bkg.pdf')
+pdf.plot('example_sig_bkg.pdf', legend=True)
 pdf.get()
 
 ```
+
+![](examples/example_sig_bkg.pdf)
 
 Observables can be initialised by a list or tuple with the column name / variable name as first argument, followed
 by the range and/or with the initial value and range:
