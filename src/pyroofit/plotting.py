@@ -105,15 +105,17 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         numbins = z.getBins()
 
     frame = z.frame(ROOT.RooFit.Title("Fit Result"), ROOT.RooFit.Bins(numbins))
-
-    data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-    model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
     
     if isinstance(legend, list):
         assert len(legend) == 4, "Please provide four coordinates for the legend"
         leg = ROOT.TLegend(*legend);
     else:
-        leg = ROOT.TLegend(0.6,0.8,0.93,0.93);
+        leg = ROOT.TLegend(0.7,0.78,0.93,0.92);
+
+    data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+    leg.AddEntry(frame.findObject("Data"), "Data", "P")
+    model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
+
     
     if components is not None:
         n_col = 0
