@@ -217,7 +217,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
 
     if extra_info is not None:
         if isinstance(extra_info, ROOT.TPaveText):
-            box.Draw("Same")
+            extra_info.Draw("Same")
         else:
             assert isinstance(extra_info, list), "Please provide extra_info with a list or ROOT.TPaveText"
             canvas.cd(1)
