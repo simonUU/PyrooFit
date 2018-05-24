@@ -58,6 +58,33 @@ class BifurGauss(PDF):
         self.roo_pdf = ROOT.RooBifurGauss(self.name, self.title, x, mean, sigma_left, sigma_right)
 
 
+class Exponential(PDF):
+    """ Exponential pdf
+
+    """
+    def __init__(self, observable, c=(0, 1), name="Exponential", **kwds):
+        super(Exponential, self).__init__(name=name, **kwds)
+        x = self.add_observable(observable)
+
+        c = self.add_parameter(c, "c")
+
+        self.roo_pdf = ROOT.RooExponential(self.name, self.title, x, c)
+
+
+class Landau(PDF):
+    """ Landau PDF
+
+    """
+    def __init__(self, observable, mean=(0, 1), sigma=(0, 1), name="Landau", **kwds):
+        super(Landau, self).__init__(name=name, **kwds)
+        x = self.add_observable(observable)
+
+        mean = self.add_parameter(mean, "mean")
+        sigma = self.add_parameter(sigma, "sigma")
+
+        self.roo_pdf = ROOT.RooLandau(self.name, self.title, x, mean, sigma)
+
+
 class BreitWigner(PDF):
     """ Standard gaussian
 
@@ -229,6 +256,9 @@ class KernelDensity(PDF):
                                        self.get_observable(),
                                        data_roo,
                                        ROOT.RooKeysPdf.MirrorBoth)
+
+
+
 
 
 class KernelDensityProd(ProdPdf):
