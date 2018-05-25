@@ -31,7 +31,6 @@ from .plotting import fast_plot
 from .observables import create_roo_variable
 
 import ROOT
-from uncertainties import ufloat
 
 
 class PDF(ClassLoggingMixin, object):
@@ -259,7 +258,13 @@ class PDF(ClassLoggingMixin, object):
                 err = 0
         if not as_ufloat:
             return val, err
-        return ufloat(val, err)
+        try:
+            from uncertainties import ufloat
+            return ufloat(val, err)
+        except ImportError:
+            return val, err
+
+
 
     def get(self, parameter=None, as_ufloat=False):
         """ Get one of the fitted parameter or print all if None is set
