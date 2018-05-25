@@ -76,10 +76,17 @@ Dependencies: ROOT (with PyRoot enabled)
 
 * Activate ROOT installation with python support
 
-* run ``python setup.py develop`` in this folder
+* run ``python setup.py install`` in this folder
 
 * run ``python setup.py docs`` to create the documentation
 
+If you do not have your own python installation you can use:
+```
+python setup.py install --user
+PATH=$PATH~/.local/bin
+```
+If there are still missing packages you might need to install them via 
+`pip install package --user`.
 
 
 Note

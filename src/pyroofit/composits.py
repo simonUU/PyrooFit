@@ -82,7 +82,7 @@ class AddPdf(PDF):
 
         for pdf_name, pdf in self.pdfs.items():
             if pdf_name not in self._external_norms:
-                norm_var = ('n_'+pdf_name, 10, 0, 1000000)
+                norm_var = ('n_'+pdf_name, 10, 0, 100000000)
                 roo_norm = create_roo_variable(norm_var)
             else:
                 roo_norm = self._external_norms[pdf_name]
@@ -216,7 +216,7 @@ class Convolution(PDF):
         roo_pdf1 = self.pdf1.roo_pdf
         roo_pdf2 = self.pdf2.roo_pdf
 
-        self.roo_pdf = ROOT.RooFFTConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
+        self.roo_pdf = ROOT.RooNumConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
 
 
 class SimFit(PDF):
