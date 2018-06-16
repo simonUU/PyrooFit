@@ -177,14 +177,14 @@ class ProdPdf(PDF):
 
         name = self.name
         title = self.name
-        self.roo_pdf = ROOT.RooProdPdf(name, name, argset_roo_pdf)
+        self.roo_pdf = ROOT.RooProdPdf(name, title, argset_roo_pdf)
 
 
 class Convolution(PDF):
     """ Convolutes two different pdfs
 
     """
-    def __init__(self, pdf1, pdf2, name="RooFFTConvPdf", desc='', **kwds):
+    def __init__(self, pdf1, pdf2, name="RooFFTConvPdf", desc='', fft=False, **kwds):
         """
         Args:
             pdf1:
@@ -193,11 +193,8 @@ class Convolution(PDF):
         self.pdf1 = pdf1
         self.pdf2 = pdf2
         self.desc = desc
-        super(Convolution, self).__init__(name="Convolution", **kwds)
+        super(Convolution, self).__init__(name=name, **kwds)
 
-    def init_pdf(self):
-        old_observables = self.observables
-        old_params = self.parameters
         self.observables = AttrDict()
         self.parameters = AttrDict()
 
@@ -217,8 +214,10 @@ class Convolution(PDF):
 
         roo_pdf1 = self.pdf1.roo_pdf
         roo_pdf2 = self.pdf2.roo_pdf
-
-        self.roo_pdf = ROOT.RooNumConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
+        if fft:
+            self.roo_pdf = ROOT.RooFFTConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
+        else:
+            self.roo_pdf = ROOT.RooNumConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
 
 
 class SimFit(PDF):

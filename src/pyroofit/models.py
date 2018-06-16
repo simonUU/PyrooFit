@@ -64,6 +64,7 @@ class Exponential(PDF):
     """
     def __init__(self, observable, c=(0, 1), name="Exponential", **kwds):
         super(Exponential, self).__init__(name=name, **kwds)
+
         x = self.add_observable(observable)
 
         c = self.add_parameter(c, "c")
