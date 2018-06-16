@@ -99,8 +99,8 @@ class BreitWigner(PDF):
 
         roo_observable = self.add_observable(observable)
 
-        roo_mean = self.add_parameter(mean, name="mean")
-        roo_sigma = self.add_parameter(sigma, name="sigma")
+        roo_mean = self.add_parameter(mean, "mean")
+        roo_sigma = self.add_parameter(sigma, "sigma")
 
         name = self.name
         title = 'BreitWigner PDF'
