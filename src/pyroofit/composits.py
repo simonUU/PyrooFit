@@ -30,11 +30,13 @@ class AddPdf(PDF):
                     self.first_pdf = pdf.name
                 self.pdfs[pdf.name] = pdf
 
-        if name is None:
-            name = "_plus_".join(pdf.name for pdf in pdfs)
+            if name is None:
+                name = "_plus_".join(pdf.name for pdf in pdfs)
+        else:
+            name = "AddPdf"
 
         self.norms = AttrDict()
-        self._external_norms={}  # To be used when there are external constraint norms
+        self._external_norms = {}  # To be used when there are external constraint norms
         super(AddPdf, self).__init__(name=name, **kwds)
 
         self.use_extended = True
