@@ -168,8 +168,8 @@ class Mbc(AddPdf):
                  observable=("mbc", 5.22, 5.3),
                  name='mbc', **kwds):
 
-        argus_bkg_pdf = Argus(observable, name="bkg")
-        cb_sig_pdf = CrystalBall(observable, name="cb")
+        argus_bkg_pdf = Argus(observable, name=name+"_argus")
+        cb_sig_pdf = CrystalBall(observable, name=name+"_cb")
         super(Mbc, self).__init__(pdfs=[cb_sig_pdf, argus_bkg_pdf], name=name, **kwds)
         self.set_mc_shape()
 
