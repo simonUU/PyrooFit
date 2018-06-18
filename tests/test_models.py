@@ -46,3 +46,11 @@ def test_Mbc():
     pdf.observables.mbc # test that mbc is available by attribute lookup
     assert isinstance(pdf.roo_pdf, ROOT.RooAddPdf)
 
+
+def test_DstD0BG():
+    import ROOT
+
+    pdf = DstD0BG(('mbc', 0, 1))
+
+    assert isinstance(pdf.roo_pdf, ROOT.RooDstD0BG)
+
