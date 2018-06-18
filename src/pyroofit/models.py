@@ -16,19 +16,21 @@ import ROOT
 class RooDstD0BG(PDF):
      """ 
      ROOT.RooDstD0BG for D0-D* mass difference
+     [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + B*(dm/dm0 - 1)
+     #TODO name your variable dm !
      """
 
      def __init__(self,
                   observable,
-                  deltaMmax=(130, 145, 155),
-                  a = (0, 0, 3),
-                  b = (0, 0, 5),
-                  c = (50, 1, 100),
+                  deltaMmax=(139.57, 155),
+                  a = (0,  10),
+                  b = (1, 5),
+                  c = (1, 5),
                   name='RooDstD0BG', **kwds):
 
            super(RooDstD0BG, self).__init__(name=name)
            x = self.add_observable(observable)
-           deltaMmax = self.add_parameter(deltaMmax, "deltammax")
+           deltaMmax = self.add_parameter(deltaMmax, "dm0")
            a = self.add_parameter(a, "a")
            b = self.add_parameter(b, "b")
            c = self.add_parameter(c, "c")
