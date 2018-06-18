@@ -13,6 +13,27 @@ from .observables import create_roo_variable
 
 import ROOT
 
+class RooDstD0BG(PDF):
+     """ 
+     ROOT.RooDstD0BG for D0-D* mass difference
+     """
+
+     def __init__(self,
+                  observable,
+                  deltaMmax=(130, 145, 155),
+                  a = (0, 0, 3),
+                  b = (0, 0, 5),
+                  c = (50, 1, 100),
+                  name='RooDstD0BG', **kwds):
+
+           super(RooDstD0BG, self).__init__(name=name)
+           x = self.add_observable(observable)
+           deltaMmax = self.add_parameter(deltaMmax, "deltammax")
+           a = self.add_parameter(a, "a")
+           b = self.add_parameter(b, "b")
+           c = self.add_parameter(c, "c")
+           self.roo_pdf = ROOT.RooDstD0BG(self.name, self.title, x, deltaMmax, a, b, c)
+
 
 class Gauss(PDF):
     """ Standard gaussian
