@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from pyroofit.models import Argus, Mbc, Chebychev
+from pyroofit.models import Argus, Mbc, Chebychev, DstD0BG
 
 import pandas as pd
 import numpy as np
