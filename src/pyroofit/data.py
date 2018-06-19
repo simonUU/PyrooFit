@@ -38,7 +38,6 @@ def roo2hist(roo, binning, obs, name, observables=None):
     return hist
 
 
-
 def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True, bins=None):
     """Convert a DataFrame into a RooDataSet
     The `column` parameters select features of the DataFrame which should be included in the RooDataSet.

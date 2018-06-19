@@ -30,11 +30,13 @@ class AddPdf(PDF):
                     self.first_pdf = pdf.name
                 self.pdfs[pdf.name] = pdf
 
-        if name is None:
-            name = "_plus_".join(pdf.name for pdf in pdfs)
+            if name is None:
+                name = "_plus_".join(pdf.name for pdf in pdfs)
+        else:
+            name = "AddPdf"
 
         self.norms = AttrDict()
-        self._external_norms={}  # To be used when there are external constraint norms
+        self._external_norms = {}  # To be used when there are external constraint norms
         super(AddPdf, self).__init__(name=name, **kwds)
 
         self.use_extended = True
@@ -99,16 +101,23 @@ class AddPdf(PDF):
         title = self.name
         self.roo_pdf = ROOT.RooAddPdf(name, title, argset_roo_pdf, argset_norm)
 
-    def _plot(self, filename, observable, data=None, *args, **kwargs):
+    def _plot(self, filename, observable, data=None, components=True, *args, **kwargs):
         # pull_plot(self.pdf, self.last_data, observable, filename, *args, **kwargs)
-        pdf_sig = None
-        pdf_bkg = None
         if data is None:
             data = self.last_data
-        components = []
-        for pdf_name, pdf in self.pdfs.items():
-            sig_norm = self.norms[pdf_name]
-            components.append((pdf.roo_pdf, sig_norm.getVal()))
+
+        if components is True:
+            components = [c for c in self.pdfs]
+
+        if components:
+            add_components = []
+            for pdf_name, pdf in self.pdfs.items():
+                if not pdf_name in components:
+                    continue
+                sig_norm = self.norms[pdf_name]
+                add_components.append((pdf.roo_pdf, sig_norm.getVal()))
+            components = add_components
+
         fast_plot(self.roo_pdf, data, observable, filename, components=components, *args, **kwargs)
 
     """
@@ -175,14 +184,14 @@ class ProdPdf(PDF):
 
         name = self.name
         title = self.name
-        self.roo_pdf = ROOT.RooProdPdf(name, name, argset_roo_pdf)
+        self.roo_pdf = ROOT.RooProdPdf(name, title, argset_roo_pdf)
 
 
 class Convolution(PDF):
     """ Convolutes two different pdfs
 
     """
-    def __init__(self, pdf1, pdf2, name="RooFFTConvPdf", desc='', **kwds):
+    def __init__(self, pdf1, pdf2, name="RooFFTConvPdf", desc='', fft=False, **kwds):
         """
         Args:
             pdf1:
@@ -193,9 +202,6 @@ class Convolution(PDF):
         self.desc = desc
         super(Convolution, self).__init__(name=name, **kwds)
 
-    def init_pdf(self):
-        old_observables = self.observables
-        old_params = self.parameters
         self.observables = AttrDict()
         self.parameters = AttrDict()
 
@@ -215,8 +221,10 @@ class Convolution(PDF):
 
         roo_pdf1 = self.pdf1.roo_pdf
         roo_pdf2 = self.pdf2.roo_pdf
-
-        self.roo_pdf = ROOT.RooNumConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
+        if fft:
+            self.roo_pdf = ROOT.RooFFTConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
+        else:
+            self.roo_pdf = ROOT.RooNumConvPdf(name, title, roo_observable, roo_pdf1, roo_pdf2)
 
 
 class SimFit(PDF):

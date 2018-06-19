@@ -7,3 +7,7 @@ try:
     __version__ = get_distribution(dist_name).version
 except DistributionNotFound:
     __version__ = 'unknown'
+
+from .composites import AddPdf, ProdPdf
+from .pdf import PDF
+from .observables import create_roo_variable

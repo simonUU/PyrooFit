@@ -8,7 +8,7 @@
 
 
 from .pdf import PDF
-from .composits import AddPdf, ProdPdf
+from .composites import AddPdf, ProdPdf
 from .observables import create_roo_variable
 
 import ROOT
@@ -64,6 +64,7 @@ class Exponential(PDF):
     """
     def __init__(self, observable, c=(0, 1), name="Exponential", **kwds):
         super(Exponential, self).__init__(name=name, **kwds)
+
         x = self.add_observable(observable)
 
         c = self.add_parameter(c, "c")
@@ -99,8 +100,8 @@ class BreitWigner(PDF):
 
         roo_observable = self.add_observable(observable)
 
-        roo_mean = self.add_parameter(mean, name="mean")
-        roo_sigma = self.add_parameter(sigma, name="sigma")
+        roo_mean = self.add_parameter(mean, "mean")
+        roo_sigma = self.add_parameter(sigma, "sigma")
 
         name = self.name
         title = 'BreitWigner PDF'
@@ -167,17 +168,9 @@ class Mbc(AddPdf):
                  observable=("mbc", 5.22, 5.3),
                  name='mbc', **kwds):
 
-        argus_bkg_pdf = Argus(observable, name="bkg")
-        cb_sig_pdf = CrystalBall(observable, name="cb")
+        argus_bkg_pdf = Argus(observable, name=name+"_argus")
+        cb_sig_pdf = CrystalBall(observable, name=name+"_cb")
         super(Mbc, self).__init__(pdfs=[cb_sig_pdf, argus_bkg_pdf], name=name, **kwds)
-        self.set_mc_shape()
-
-    def set_mc_shape(self):
-        self.parameters['mean'].setVal(5.27950857339)
-        self.parameters['sigma'].setVal(0.00257244992496)
-        self.parameters['alpha'].setVal(2.6510288204)
-        self.parameters['n'].setVal(1.15959232008)
-        self.pdfs['cb'].fix(True)
 
     def get_argus_integral(self, lwb, upb):
         roo_observable = self.get_observable()
@@ -258,9 +251,6 @@ class KernelDensity(PDF):
                                        ROOT.RooKeysPdf.MirrorBoth)
 
 
-
-
-
 class KernelDensityProd(ProdPdf):
     def __init__(self, observables, data=None, weights=None, name=None, **kwds):
         name = 'bkg' if name is None else name
@@ -290,4 +280,19 @@ class KernelDensityProd(ProdPdf):
         self.pdfs = pdfs
         self.init_pdf()
 
+
+class DstD0BG(PDF):
+    """ ROOT.RooDstD0BG for D0-D* mass difference
+        [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + b*(dm/dm0 - 1)
+    """
+    def __init__(self, observable, dm0=(139.57, 155), a=(0,  10), b=(1, 5), c=(1, 5), name='DstD0BG', **kwds):
+
+        super(DstD0BG, self).__init__(name=name, **kwds)
+
+        x = self.add_observable(observable)
+        dm0 = self.add_parameter(dm0, "dm0")
+        a = self.add_parameter(a, "a")
+        b = self.add_parameter(b, "b")
+        c = self.add_parameter(c, "c")
+        self.roo_pdf = ROOT.RooDstD0BG(self.name, self.title, x, dm0, a, b, c)
 

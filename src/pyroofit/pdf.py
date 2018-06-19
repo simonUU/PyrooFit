@@ -73,11 +73,11 @@ class PDF(ClassLoggingMixin, object):
         return self.roo_pdf
 
     def __add__(self, other):
-        from .composits import AddPdf
+        from .composites import AddPdf
         return AddPdf([self, other])
 
     def __mul__(self, other):
-        from .composits import ProdPdf
+        from .composites import ProdPdf
         return ProdPdf([self, other])
 
     def init_pdf(self):

@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from pyroofit.models import Gauss, Chebychev
-from pyroofit.composits import AddPdf, ProdPdf, Convolution
+from pyroofit.composites import AddPdf, ProdPdf, Convolution
 
 
 def get_test_df(size=100):
