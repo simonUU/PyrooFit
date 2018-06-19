@@ -113,8 +113,10 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         leg = ROOT.TLegend(0.7,0.78,0.93,0.92);
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-    leg.AddEntry(frame.findObject("Data"), "Data", "PE")
+    leg.AddEntry(frame.findObject("Data"), "Data", "LEP")
+
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
+    leg.AddEntry(frame.findObject("Model"), "Fit")
 
     
     if components is not None:
@@ -223,7 +225,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
             for txt in extra_text:
                 assert isinstance(txt, ROOT.TPaveText), "Please provide extra_txt with a list or ROOT.TPaveText"
                 txt.Draw("Same")
-                
+
     if extra_info is not None:
         canvas.cd(1)
         if isinstance(extra_info, ROOT.TPaveText):

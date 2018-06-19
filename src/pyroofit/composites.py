@@ -101,16 +101,23 @@ class AddPdf(PDF):
         title = self.name
         self.roo_pdf = ROOT.RooAddPdf(name, title, argset_roo_pdf, argset_norm)
 
-    def _plot(self, filename, observable, data=None, *args, **kwargs):
+    def _plot(self, filename, observable, data=None, components=True, *args, **kwargs):
         # pull_plot(self.pdf, self.last_data, observable, filename, *args, **kwargs)
-        pdf_sig = None
-        pdf_bkg = None
         if data is None:
             data = self.last_data
-        components = []
-        for pdf_name, pdf in self.pdfs.items():
-            sig_norm = self.norms[pdf_name]
-            components.append((pdf.roo_pdf, sig_norm.getVal()))
+
+        if components is True:
+            components = [c for c in self.pdfs]
+
+        if components:
+            add_components = []
+            for pdf_name, pdf in self.pdfs.items():
+                if not pdf_name in components:
+                    continue
+                sig_norm = self.norms[pdf_name]
+                add_components.append((pdf.roo_pdf, sig_norm.getVal()))
+            components = add_components
+
         fast_plot(self.roo_pdf, data, observable, filename, components=components, *args, **kwargs)
 
     """
