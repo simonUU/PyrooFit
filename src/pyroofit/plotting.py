@@ -216,11 +216,12 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     plot_pulls.Draw("Xsame")
 
     if extra_info is not None:
+        canvas.cd(1)
         if isinstance(extra_info, ROOT.TPaveText):
             extra_info.Draw("Same")
         else:
             assert isinstance(extra_info, list), "Please provide extra_info with a list or ROOT.TPaveText"
-            canvas.cd(1)
+
             box = ROOT.TPaveText(0.2, 0.75, 0.4, 0.9, "NDC")
             box.SetFillColor(10)
             box.SetBorderSize(0)
