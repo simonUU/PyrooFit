@@ -8,7 +8,7 @@
 
 
 from .pdf import PDF
-from .composits import AddPdf, ProdPdf
+from .composites import AddPdf, ProdPdf
 from .observables import create_roo_variable
 
 import ROOT

@@ -89,10 +89,9 @@ If there are still missing packages you might need to install them via
 `pip install package --user`.
 
 
-Note
-====
 
-This project has been set up using PyScaffold 2.5.6. For details and usage
-information on PyScaffold see http://pyscaffold.readthedocs.org/.
+Planned Features
+================
 
-
+- Save and load PDF as yaml 
+- Plotting in matpltotlib 
