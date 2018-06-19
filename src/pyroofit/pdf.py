@@ -264,8 +264,6 @@ class PDF(ClassLoggingMixin, object):
         except ImportError:
             return val, err
 
-
-
     def get(self, parameter=None, as_ufloat=False):
         """ Get one of the fitted parameter or print all if None is set
 

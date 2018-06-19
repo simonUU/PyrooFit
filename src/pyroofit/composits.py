@@ -191,7 +191,7 @@ class Convolution(PDF):
         self.pdf1 = pdf1
         self.pdf2 = pdf2
         self.desc = desc
-        super(Convolution, self).__init__(name="Convolution", **kwds)
+        super(Convolution, self).__init__(name=name, **kwds)
 
     def init_pdf(self):
         old_observables = self.observables
@@ -209,7 +209,7 @@ class Convolution(PDF):
             raise NotImplemented("Currently support one dimensional convolutions")
 
         name = self.name
-        title = self.name
+        title = self.title
 
         roo_observable = self.get_observable()
 
