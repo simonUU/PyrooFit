@@ -113,7 +113,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
         leg = ROOT.TLegend(0.7,0.78,0.93,0.92);
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-    leg.AddEntry(frame.findObject("Data"), "Data", "P")
+    leg.AddEntry(frame.findObject("Data"), "Data", "PE")
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
 
     
