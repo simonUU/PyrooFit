@@ -65,7 +65,7 @@ def set_root_style(font_scale=1.0, label_scale=1.0):
     ROOT.gStyle.SetLegendBorderSize(0)
 
 
-DEFAULT_PALETTE = [ROOT.kRed - 7, ROOT.kAzure + 5, ROOT.kMagenta+1, ROOT.kGreen-2, ROOT.kYellow]
+DEFAULT_PALETTE = [1, ROOT.kRed - 7, ROOT.kAzure + 5, ROOT.kMagenta+1, ROOT.kGreen-2, ROOT.kYellow]
 DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
 
 
@@ -115,12 +115,12 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
     leg.AddEntry(frame.findObject("Data"), "Data", "LEP")
 
-    model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1))
-    leg.AddEntry(frame.findObject("Model"), "Fit")
+    model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(color_cycle[0]))
+    leg.AddEntry(frame.findObject("Model"), "Fit", "L")
 
     
     if components is not None:
-        n_col = 0
+        n_col = 1
         for c, ni in components:
             c.plotOn(frame,
                      ROOT.RooFit.LineColor(color_cycle[n_col]+line_shade),

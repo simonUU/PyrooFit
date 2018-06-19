@@ -109,6 +109,9 @@ class AddPdf(PDF):
         if components is True:
             components = [c for c in self.pdfs]
 
+        if components is False:
+            components = []
+
         if components:
             add_components = []
             for pdf_name, pdf in self.pdfs.items():
