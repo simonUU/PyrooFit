@@ -218,7 +218,7 @@ class Convolution(PDF):
             raise NotImplemented("Currently support one dimensional convolutions")
 
         name = self.name
-        title = self.name
+        title = self.title
 
         roo_observable = self.get_observable()
 
