@@ -173,13 +173,6 @@ class Mbc(AddPdf):
         super(Mbc, self).__init__(pdfs=[cb_sig_pdf, argus_bkg_pdf], name=name, **kwds)
         self.set_mc_shape()
 
-    def set_mc_shape(self):
-        self.parameters['mean'].setVal(5.27950857339)
-        self.parameters['sigma'].setVal(0.00257244992496)
-        self.parameters['alpha'].setVal(2.6510288204)
-        self.parameters['n'].setVal(1.15959232008)
-        self.pdfs['cb'].fix(True)
-
     def get_argus_integral(self, lwb, upb):
         roo_observable = self.get_observable()
         roo_observable.setRange("intrange", lwb, upb)
