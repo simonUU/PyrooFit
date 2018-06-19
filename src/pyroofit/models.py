@@ -251,9 +251,6 @@ class KernelDensity(PDF):
                                        ROOT.RooKeysPdf.MirrorBoth)
 
 
-
-
-
 class KernelDensityProd(ProdPdf):
     def __init__(self, observables, data=None, weights=None, name=None, **kwds):
         name = 'bkg' if name is None else name
@@ -283,4 +280,19 @@ class KernelDensityProd(ProdPdf):
         self.pdfs = pdfs
         self.init_pdf()
 
+
+class DstD0BG(PDF):
+    """ ROOT.RooDstD0BG for D0-D* mass difference
+        [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + b*(dm/dm0 - 1)
+    """
+    def __init__(self, observable, dm0=(139.57, 155), a=(0,  10), b=(1, 5), c=(1, 5), name='DstD0BG', **kwds):
+
+        super(DstD0BG, self).__init__(name=name, **kwds)
+
+        x = self.add_observable(observable)
+        dm0 = self.add_parameter(dm0, "dm0")
+        a = self.add_parameter(a, "a")
+        b = self.add_parameter(b, "b")
+        c = self.add_parameter(c, "c")
+        self.roo_pdf = ROOT.RooDstD0BG(self.name, self.title, x, dm0, a, b, c)
 
