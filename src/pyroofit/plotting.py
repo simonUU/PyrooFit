@@ -71,7 +71,7 @@ DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
 
 def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
-              fill_cycle=DEFAULT_STYLES, line_shade=0, legend=False,
+              fill_cycle=DEFAULT_STYLES, line_shade=0, legend=False, extra_text=None,
               ):
     """ Function to plot the PDF model 
      
@@ -215,13 +215,21 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     hist_pulls.Draw("HISTsame")
     plot_pulls.Draw("Xsame")
 
+    if extra_text is not None:
+        canvas.cd(1)
+        if isinstance(extra_text, ROOT.TPaveText):
+            extra_info.Draw("Same")
+        if isinstance(extra_text, list):
+            for txt in extra_text:
+                assert isinstance(txt, ROOT.TPaveText), "Please provide extra_txt with a list or ROOT.TPaveText"
+                txt.Draw("Same")
+                
     if extra_info is not None:
         canvas.cd(1)
         if isinstance(extra_info, ROOT.TPaveText):
             extra_info.Draw("Same")
         else:
             assert isinstance(extra_info, list), "Please provide extra_info with a list or ROOT.TPaveText"
-
             box = ROOT.TPaveText(0.2, 0.75, 0.4, 0.9, "NDC")
             box.SetFillColor(10)
             box.SetBorderSize(0)
