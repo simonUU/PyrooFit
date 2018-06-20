@@ -6,7 +6,6 @@
 
 """
 
-
 from .pdf import PDF
 from .composites import AddPdf, ProdPdf
 from .observables import create_roo_variable
@@ -78,6 +77,7 @@ class Landau(PDF):
     """
     def __init__(self, observable, mean=(0, 1), sigma=(0, 1), name="Landau", **kwds):
         super(Landau, self).__init__(name=name, **kwds)
+
         x = self.add_observable(observable)
 
         mean = self.add_parameter(mean, "mean")
@@ -98,15 +98,12 @@ class BreitWigner(PDF):
 
         super(BreitWigner, self).__init__(name=name, **kwds)
 
-        roo_observable = self.add_observable(observable)
+        x = self.add_observable(observable)
 
         roo_mean = self.add_parameter(mean, "mean")
         roo_sigma = self.add_parameter(sigma, "sigma")
 
-        name = self.name
-        title = 'BreitWigner PDF'
-
-        self.roo_pdf = ROOT.RooBreitWigner(name, title, roo_observable, roo_mean, roo_sigma)
+        self.roo_pdf = ROOT.RooBreitWigner(name, title, x, roo_mean, roo_sigma)
 
 
 class Argus(PDF):
@@ -122,10 +119,11 @@ class Argus(PDF):
         super(Argus, self).__init__(name=name, observables=[observable], **kwds)
 
         x = self.get_observable()
-        roo_argus_m0 = self.add_parameter(m0, "m0")
-        roo_argus_c = self.add_parameter(c, "c")
 
-        self.roo_pdf = ROOT.RooArgusBG(self.name, self.title, x, roo_argus_m0, roo_argus_c)
+        m0 = self.add_parameter(m0, "m0")
+        c = self.add_parameter(c, "c")
+
+        self.roo_pdf = ROOT.RooArgusBG(self.name, self.title, x, m0, c)
 
 
 class CrystalBall(PDF):
@@ -142,16 +140,14 @@ class CrystalBall(PDF):
 
         super(CrystalBall, self).__init__(name=name, **kwds)
 
-        roo_observable = self.add_observable(observable)
+        x = self.add_observable(observable)
 
-        roo_cb_mean = self.add_parameter(mean, "mean")
-        roo_cb_sigma = self.add_parameter(sigma, "sigma")
-        roo_cb_alpha = self.add_parameter(alpha, "alpha")
-        roo_cb_n = self.add_parameter(n, "n")
+        mean = self.add_parameter(mean, "mean")
+        sigma = self.add_parameter(sigma, "sigma")
+        alpha = self.add_parameter(alpha, "alpha")
+        n = self.add_parameter(n, "n")
 
-
-        self.roo_pdf = ROOT.RooCBShape(self.name, self.title, roo_observable,
-                                       roo_cb_mean, roo_cb_sigma, roo_cb_alpha, roo_cb_n)
+        self.roo_pdf = ROOT.RooCBShape(self.name, self.title, x, mean, sigma, alpha, n)
 
 
 class Mbc(AddPdf):
@@ -185,7 +181,7 @@ class Mbc(AddPdf):
         return self.get_argus_integral(min, max)/norm
 
     def get_nb_sigreg(self):
-        return self.norms['bkg'].getVal() * self.argus_norm_integral(5.27, 5.3)
+        return self.norms[self.name+"_argus"].getVal() * self.argus_norm_integral(5.27, 5.3)
 
 
 class Chebychev(PDF):
@@ -263,7 +259,6 @@ class KernelDensityProd(ProdPdf):
             # kernel_density_factor = KernelDensity(observable, data, weights, name=name+observable_name)
             # pdfs.append(kernel_density_factor)
 
-
         self.has_data = False
         if data is not None:
             self.last_data = self.get_fit_data(data, weights=weights)
@@ -290,9 +285,11 @@ class DstD0BG(PDF):
         super(DstD0BG, self).__init__(name=name, **kwds)
 
         x = self.add_observable(observable)
+
         dm0 = self.add_parameter(dm0, "dm0")
         a = self.add_parameter(a, "a")
         b = self.add_parameter(b, "b")
         c = self.add_parameter(c, "c")
+
         self.roo_pdf = ROOT.RooDstD0BG(self.name, self.title, x, dm0, a, b, c)
 

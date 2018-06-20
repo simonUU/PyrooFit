@@ -11,9 +11,6 @@ from .utilities import  ClassLoggingMixin
 import ROOT
 
 
-
-
-
 class Plotter(ClassLoggingMixin):
     def __init__(self, pdf):
         super(Plotter, self).__init__()
@@ -25,8 +22,7 @@ class Plotter(ClassLoggingMixin):
         # if nbins is None:
         #     try:
         #         nbins = get_optimal_bin_size(pdf.last_data.num)
-       self.frame =  self.pdf.get_observable().frame(ROOT.RooFit.Title(title), ROOT.RooFit.Bins(nbins))
-
+        self.frame = self.pdf.get_observable().frame(ROOT.RooFit.Title(title), ROOT.RooFit.Bins(nbins))
 
 
 def get_optimal_bin_size(n):
@@ -73,8 +69,8 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
               fill_cycle=DEFAULT_STYLES, line_shade=0, legend=False, extra_text=None,
               ):
-    """ Function to plot the PDF model 
-     
+    """ Function to plot the PDF model
+
     Parameters
     ----------
     model
@@ -92,11 +88,15 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     label_scale
     color_cycle
     fill_cycle
+    line_shade
+    legend
+    extra_text
 
     Returns
     -------
 
     """
+
     
     set_root_style(font_scale, label_scale)
 
@@ -108,16 +108,15 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     
     if isinstance(legend, list):
         assert len(legend) == 4, "Please provide four coordinates for the legend"
-        leg = ROOT.TLegend(*legend);
+        leg = ROOT.TLegend(*legend)
     else:
-        leg = ROOT.TLegend(0.7,0.78,0.93,0.92);
+        leg = ROOT.TLegend(0.7,0.78,0.93,0.92)
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
     leg.AddEntry(frame.findObject("Data"), "Data", "LEP")
 
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(color_cycle[0]))
     leg.AddEntry(frame.findObject("Model"), "Fit", "L")
-
     
     if components is not None:
         n_col = 1
@@ -138,8 +137,6 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
 
             n_col += 1
 
-    
-    
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(color_cycle[0]))
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
     

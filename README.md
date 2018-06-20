@@ -93,5 +93,7 @@ If there are still missing packages you might need to install them via
 Planned Features
 ================
 
+- Improve documentation
 - Save and load PDF as yaml 
 - Plotting in matpltotlib 
+
