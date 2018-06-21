@@ -13,6 +13,7 @@ Example
 Simple fit and plot of a Gaussian Distribution:
 
 .. code-block:: python
+
    from pyroofit.models import Gauss
    import numpy as np
 
@@ -24,11 +25,10 @@ Simple fit and plot of a Gaussian Distribution:
 
    pdf.get()
 
-
-
 A more complex example on combination of Gauss pdf for signal and Polynomial for background:
 
 .. code-block:: python
+
    from pyroofit.models import Gauss, Chebychev
    import numpy as np
    import pandas as pd
@@ -51,7 +51,7 @@ A more complex example on combination of Gauss pdf for signal and Polynomial for
 
 
 
-.. figure:: www.desy.de/~swehle/pyroofit.png
+.. figure:: http://www.desy.de/~swehle/pyroofit.png
    :scale: 50 %
    :alt: Example fit
 
@@ -61,6 +61,7 @@ Observables can be initialised by a list or tuple with the column name / variabl
 by the range and/or with the initial value and range:
 
 .. code-block:: python
+
    x = ('x', -3, 3)
    x = ('mass', -3, 0.02, 3)
 
