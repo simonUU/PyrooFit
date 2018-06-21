@@ -12,59 +12,64 @@ Example
 
 Simple fit and plot of a Gaussian Distribution:
 
-```python
-from pyroofit.models import Gauss
-import numpy as np
+.. code-block:: python
+   from pyroofit.models import Gauss
+   import numpy as np
 
-data = np.random.normal(0, 1, 1000)
+   data = np.random.normal(0, 1, 1000)
 
-pdf = Gauss(('x', -3, 3), mean=(-1, 0, 1))
-pdf.fit(data)
-pdf.plot('example_gauss.pdf',)
+   pdf = Gauss(('x', -3, 3), mean=(-1, 0, 1))
+   pdf.fit(data)
+   pdf.plot('example_gauss.pdf',)
 
-pdf.get()
+   pdf.get()
 
-```
+
 
 A more complex example on combination of Gauss pdf for signal and Polynomial for background:
 
-```python
-from pyroofit.models import Gauss, Chebychev
-import numpy as np
-import pandas as pd
-import ROOT
+.. code-block:: python
+   from pyroofit.models import Gauss, Chebychev
+   import numpy as np
+   import pandas as pd
+   import ROOT
 
 
-df = {'mass': np.append(np.random.random_sample(1000)*7 - 3.5, np.random.normal(0, 0.5, 1000))}
-df = pd.DataFrame(df)
+   df = {'mass': np.append(np.random.random_sample(1000)*7 - 3.5, np.random.normal(0, 0.5, 1000))}
+   df = pd.DataFrame(df)
 
-x = ROOT.RooRealVar('mass', 'M', 0, -3, 3, 'GeV')
+   x = ROOT.RooRealVar('mass', 'M', 0, -3, 3, 'GeV')
 
-pdf_sig = Gauss(x, mean=(-1, 1), title="Signal")
-pdf_bkg = Chebychev(x, n=1, title="Background")
+   pdf_sig = Gauss(x, mean=(-1, 1), title="Signal")
+   pdf_bkg = Chebychev(x, n=1, title="Background")
 
-pdf = pdf_sig + pdf_bkg
+   pdf = pdf_sig + pdf_bkg
 
-pdf.fit(df)
-pdf.plot('example_sig_bkg.pdf', legend=True)
-pdf.get()
+   pdf.fit(df)
+   pdf.plot('example_sig_bkg.pdf', legend=True)
+   pdf.get()
 
-```
 
-![](../examples/example_sig_bkg.pdf)
+
+.. figure:: www.desy.de/~swehle/pyroofit.png
+   :scale: 50 %
+   :alt: Example fit
+
+   Output of the example fit.
 
 Observables can be initialised by a list or tuple with the column name / variable name as first argument, followed
 by the range and/or with the initial value and range:
-```
-x = ('x', -3, 3)
-x = ('mass', -3, 0.02, 3)
-```
 
-Parameters are initialised with a tuple: `sigma=(0,1)`
-or again including a starting parameter: `sigma=(0.01, 0, 1)`
+.. code-block:: python
+   x = ('x', -3, 3)
+   x = ('mass', -3, 0.02, 3)
+
+
+Parameters are initialised with a tuple: :code:`sigma=(0,1)`
+or again including a starting parameter: :code:`sigma=(0.01, 0, 1)`
 The order here is not important.
 
-All parameters and observables can also be initialised by a `ROOT.RooRealVar`.
+All parameters and observables can also be initialised by a :code:`ROOT.RooRealVar`.
 
 Installation
 ============
@@ -78,17 +83,16 @@ Dependencies: ROOT (with PyRoot enabled)
 
 * Activate ROOT installation with python support
 
-* run ``python setup.py install`` in this folder
+* run :code:`python setup.py install` in this folder
 
-* run ``python setup.py docs`` to create the documentation
+* run :code:`python setup.py docs` to create the documentation
 
 If you do not have your own python installation you can use:
 ```
 python setup.py install --user
 PATH=$PATH~/.local/bin
 ```
-If there are still missing packages you might need to install them via
-`pip install package --user`.
+If there are still missing packages you might need to install them via :code:`pip install package --user`.
 
 
 
