@@ -1,41 +1,103 @@
 ========
-pyroofit
+PyrooFit
 ========
 
-This is the documentation of **pyroofit**.
 
-.. note::
+PyrooFit is a fit framework for python and pandas DataFrames on top of the ROOT.RooFit package.
 
-    This is the main page of your project's `Sphinx <http://sphinx-doc.org/>`_
-    documentation. It is formatted in `reStructuredText
-    <http://sphinx-doc.org/rest.html>`__. Add additional pages by creating
-    rst-files in ``docs`` and adding them to the `toctree
-    <http://sphinx-doc.org/markup/toctree.html>`_ below. Use then
-    `references <http://sphinx-doc.org/markup/inline.html>`__ in order to link
-    them from this page, e.g. :ref:`authors <authors>` and :ref:`changes`.
+The package allows for simple fits of standard PDFs and easy setup of custom PDFs in one or more fit dimensions.
 
-    It is also possible to refer to the documentation of other Python packages
-    with the `Python domain syntax
-    <http://sphinx-doc.org/domains.html#the-python-domain>`__. By default you
-    can reference the documentation of `Sphinx <http://sphinx.pocoo.org>`__,
-    `Python <http://docs.python.org/>`__, `NumPy
-    <http://docs.scipy.org/doc/numpy>`__, `SciPy
-    <http://docs.scipy.org/doc/scipy/reference/>`__, `matplotlib
-    <http://matplotlib.sourceforge.net>`__, `Pandas
-    <http://pandas.pydata.org/pandas-docs/stable>`__, `Scikit-Learn
-    <http://scikit-learn.org/stable>`__. You can add more by
-    extending the ``intersphinx_mapping`` in your Sphinx's ``conf.py``.
+Example
+-------
 
-    The pretty useful extension `autodoc
-    <http://www.sphinx-doc.org/en/stable/ext/autodoc.html>`__ is activated by
-    default and lets you include documentation from docstrings. Docstrings can
-    be written in `Google
-    <http://google.github.io/styleguide/pyguide.html#Comments>`__
-    (recommended!), `NumPy
-    <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`__
-    and `classical
-    <http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists>`__
-    style.
+Simple fit and plot of a Gaussian Distribution:
+
+```python
+from pyroofit.models import Gauss
+import numpy as np
+
+data = np.random.normal(0, 1, 1000)
+
+pdf = Gauss(('x', -3, 3), mean=(-1, 0, 1))
+pdf.fit(data)
+pdf.plot('example_gauss.pdf',)
+
+pdf.get()
+
+```
+
+A more complex example on combination of Gauss pdf for signal and Polynomial for background:
+
+```python
+from pyroofit.models import Gauss, Chebychev
+import numpy as np
+import pandas as pd
+import ROOT
+
+
+df = {'mass': np.append(np.random.random_sample(1000)*7 - 3.5, np.random.normal(0, 0.5, 1000))}
+df = pd.DataFrame(df)
+
+x = ROOT.RooRealVar('mass', 'M', 0, -3, 3, 'GeV')
+
+pdf_sig = Gauss(x, mean=(-1, 1), title="Signal")
+pdf_bkg = Chebychev(x, n=1, title="Background")
+
+pdf = pdf_sig + pdf_bkg
+
+pdf.fit(df)
+pdf.plot('example_sig_bkg.pdf', legend=True)
+pdf.get()
+
+```
+
+![](../examples/example_sig_bkg.pdf)
+
+Observables can be initialised by a list or tuple with the column name / variable name as first argument, followed
+by the range and/or with the initial value and range:
+```
+x = ('x', -3, 3)
+x = ('mass', -3, 0.02, 3)
+```
+
+Parameters are initialised with a tuple: `sigma=(0,1)`
+or again including a starting parameter: `sigma=(0.01, 0, 1)`
+The order here is not important.
+
+All parameters and observables can also be initialised by a `ROOT.RooRealVar`.
+
+Installation
+============
+
+Dependencies: ROOT (with PyRoot enabled)
+
+
+* Download this repository
+
+* (recommended) Use or install anaconda python environment
+
+* Activate ROOT installation with python support
+
+* run ``python setup.py install`` in this folder
+
+* run ``python setup.py docs`` to create the documentation
+
+If you do not have your own python installation you can use:
+```
+python setup.py install --user
+PATH=$PATH~/.local/bin
+```
+If there are still missing packages you might need to install them via
+`pip install package --user`.
+
+
+
+Planned Features
+================
+
+- Improve documentation
+- Save and load PDF as yaml
+- Plotting in matpltotlib
 
 
 Contents

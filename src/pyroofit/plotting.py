@@ -3,7 +3,9 @@
 
     Difficult to make nice with all the ROOT calls.
 
-    TODO: Plotter class containing the RooFit frame
+    TODO: - Plotter class containing the RooFit frame
+          - Equal length ticks
+
 
 """
 from __future__ import print_function
@@ -37,6 +39,8 @@ def get_optimal_bin_size(n):
 
 def set_root_style(font_scale=1.0, label_scale=1.0):
     """  Setting a general style that one can look at plots without getting eye-cancer.
+
+        TODO: Absolute font size
 
     """
     ROOT.gStyle.SetOptTitle(0)
