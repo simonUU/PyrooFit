@@ -49,12 +49,9 @@ A more complex example on combination of Gauss pdf for signal and Polynomial for
     pdf.plot('example_sig_bkg.pdf', legend=True)
     pdf.get()
 
-.. image:: http://www.desy.de/~swehle/pyroofit.png
-   :width: 500px
-   :alt: Example fit with PyrooFit
-   :align: center
-
-   Output of the example fit.
+.. figure:: http://www.desy.de/~swehle/pyroofit.png
+   :scale: 30 %
+   :alt: Output of the example fit.
 
 Observables can be initialised by a list or tuple with the column name / variable name as first argument, followed
 by the range and/or with the initial value and range:
