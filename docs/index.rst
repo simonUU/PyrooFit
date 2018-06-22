@@ -49,9 +49,10 @@ A more complex example on combination of Gauss pdf for signal and Polynomial for
     pdf.plot('example_sig_bkg.pdf', legend=True)
     pdf.get()
 
-.. figure:: http://www.desy.de/~swehle/pyroofit.png
-   :scale: 50 %
-   :alt: Example fit
+.. image:: http://www.desy.de/~swehle/pyroofit.png
+   :width: 500px
+   :alt: Example fit with PyrooFit
+   :align: center
 
    Output of the example fit.
 
