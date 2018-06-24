@@ -33,12 +33,13 @@ import pandas as pd
 import ROOT
 
 
-df = {'mass': np.append(np.random.random_sample(1000)*7 - 3.5, np.random.normal(0, 0.5, 1000))}
+
+df = {'mass': np.append(np.random.random_sample(1000)*10 + 745, np.random.normal(750, 1, 1000))}
 df = pd.DataFrame(df)
 
-x = ROOT.RooRealVar('mass', 'M', 0, -3, 3, 'GeV')
+x = ROOT.RooRealVar('mass', 'M', 750, 745, 755, 'GeV')  # or x = ('mass', 745, 755)
 
-pdf_sig = Gauss(x, mean=(-1, 1), title="Signal")
+pdf_sig = Gauss(x, mean=(745, 755), sigma=(0.1, 1, 2), title="Signal")
 pdf_bkg = Chebychev(x, n=1, title="Background")
 
 pdf = pdf_sig + pdf_bkg
