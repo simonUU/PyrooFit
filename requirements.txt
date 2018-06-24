@@ -2,7 +2,6 @@
 # numpy
 # scipy>=0.9
 pandas>0.1
-#root_numpy>0.1
+root_numpy>0.1
 uncertainties>2.0
 numpy>=0.9
-pyscaffold
