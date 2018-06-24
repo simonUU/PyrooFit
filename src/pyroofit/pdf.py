@@ -3,7 +3,7 @@
 
 The pdf base class is the main interface to ROOT.
 This class basically serves as a wrapper around
-AbsPDF of the Roofit package and takes monitors and initiates
+AbsPDF of the Roofit package and takes, monitors and initiates
 observables and parmeters.
 
 Examples
@@ -13,11 +13,11 @@ Examples
         def __init__(self, x, param, name='MyPDF'):
             super(MyPDF, self).__init__(name=name, **kwds)
 
-            self.add_observable(x)
+            x = self.add_observable(x)
 
-            self.add_parameter(param)
+            param1 = self.add_parameter(param)
 
-            self.roo_pdf = ROOT.MyPDF(self.name, self.title, self.observables('x'), self.parameters.para1)
+            self.roo_pdf = ROOT.MyPDF(self.name, self.title, x, param1)
 
 
 """
