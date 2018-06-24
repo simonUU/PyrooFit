@@ -50,7 +50,7 @@ pdf.get()
 
 ```
 
-![Example Output](http://desy.de/~swehle/pyroofit.png)
+<img src="http://desy.de/~swehle/pyroofit.png" width="400" height="400">
 
 Observables can be initialised by a list or tuple with the column name / variable name as first argument, followed
 by the range and/or with the initial value and range:
