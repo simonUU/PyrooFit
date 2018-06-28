@@ -11,3 +11,4 @@ except DistributionNotFound:
 from .composites import AddPdf, ProdPdf
 from .pdf import PDF
 from .observables import create_roo_variable
+from .data import df2roo

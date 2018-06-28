@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """ Observables
 
-    Interface to RooRealVar objects.
+Interface to RooRealVar objects.
+
+Todo:
+    * This can be made better, maybe only one function
 
 """
 
@@ -9,16 +12,14 @@ import ROOT
 
 
 def extract_from_list(var):
-    """
+    """ Extract name, min, mean and max from a list
 
-    Parameters
-    ----------
-    var : list or tuple
-        List or tuple
+    Args:
+        var (list): List in a format like ['x', -1, 1] or (-2, 0, 3)
 
-    Returns
-    -------
-        name, val, lwb, upb
+    Returns:
+        name, value, min, max
+
     """
     var = list(var)
     name = val = lwb = upb = None
@@ -39,30 +40,22 @@ def extract_from_list(var):
     return name, val, lwb, upb
 
 
-def create_roo_variable(var=None,
-                        name='x',
-                        title='',
-                        lwb=None,
-                        upb=None,
-                        val=None,
-                        unit='',):
-    """ Crate a RooRealVar through several ways
+def create_roo_variable(var=None, name='x', title='', lwb=None, upb=None, val=None, unit=''):
+    """ Magic function to convert several objects into ROOT.RooRealVar
 
-    Parameters
-    ----------
-    var
-    name
-    title
-    lwb
-    upb
-    val
-    unit
+    Args:
+        var (list or ROOT.RooAbsReal): Variable from list or ROOT object
+        name (str): Name of the new ROOT.RooRealVar
+        title (str): Title of the new ROOT.RooRealVar
+        lwb (float): Lower bound
+        upb (float): Upper bound
+        val (float): Value
+        unit (str): ROOT formatted string containing the unit of the observable
 
-    Returns
-    -------
-        RooRealVar
+    Returns:
+        ROOT.RooRealVar observable
+
     """
-
     if isinstance(var, ROOT.RooRealVar):
         return var
 

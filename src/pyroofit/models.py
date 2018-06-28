@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """ Fit models predefined
 
-    In this module  all the predifined models are defined.
+This module contains predefined wrappers for ROOT.RooFit pdfs.
 
 
 """
 
+import ROOT
+
 from .pdf import PDF
 from .composites import AddPdf, ProdPdf
 from .observables import create_roo_variable
-
-import ROOT
 
 
 class Gauss(PDF):
@@ -21,17 +21,16 @@ class Gauss(PDF):
                  observable,
                  mean=(-1, 0, 1),
                  sigma=(0, 1),
-                 name='gauss',
-                 title='Gaussian PDF', **kwds):
+                 name='gauss', **kwds):
 
-        super(Gauss, self).__init__(name=name, title=title, **kwds)
+        super(Gauss, self).__init__(name=name,  **kwds)
 
         x = self.add_observable(observable)
 
         mean = self.add_parameter(mean, "mean")
         sigma = self.add_parameter(sigma, "sigma")
 
-        self.roo_pdf = ROOT.RooGaussian(self.name, title, x, mean, sigma)
+        self.roo_pdf = ROOT.RooGaussian(self.name, self.title, x, mean, sigma)
 
 
 class BifurGauss(PDF):
@@ -61,7 +60,11 @@ class Exponential(PDF):
     """ Exponential pdf
 
     """
-    def __init__(self, observable, c=(0, 1), name="Exponential", **kwds):
+    def __init__(self,
+                 observable,
+                 c=(0, 1),
+                 name="exponential", **kwds):
+
         super(Exponential, self).__init__(name=name, **kwds)
 
         x = self.add_observable(observable)
@@ -75,7 +78,12 @@ class Landau(PDF):
     """ Landau PDF
 
     """
-    def __init__(self, observable, mean=(0, 1), sigma=(0, 1), name="Landau", **kwds):
+    def __init__(self,
+                 observable,
+                 mean=(0, 1),
+                 sigma=(0, 1),
+                 name="Landau", **kwds):
+
         super(Landau, self).__init__(name=name, **kwds)
 
         x = self.add_observable(observable)
@@ -87,7 +95,7 @@ class Landau(PDF):
 
 
 class BreitWigner(PDF):
-    """ Standard gaussian
+    """ BreitWigner PDF
 
     """
     def __init__(self,
@@ -103,11 +111,11 @@ class BreitWigner(PDF):
         roo_mean = self.add_parameter(mean, "mean")
         roo_sigma = self.add_parameter(sigma, "sigma")
 
-        self.roo_pdf = ROOT.RooBreitWigner(name, title, x, roo_mean, roo_sigma)
+        self.roo_pdf = ROOT.RooBreitWigner(name, self.title, x, roo_mean, roo_sigma)
 
 
 class Argus(PDF):
-    """ Argus PDF
+    """ Argus PDF with default values for B mesons at B factories
 
     """
     def __init__(self,
@@ -127,7 +135,7 @@ class Argus(PDF):
 
 
 class CrystalBall(PDF):
-    """ Crystal Ball PDF
+    """ Crystal Ball PDF with default values for B mesons at B factories
 
         """
     def __init__(self,
@@ -190,7 +198,10 @@ class Chebychev(PDF):
         This is a generic polynomial PDF
 
     """
-    def __init__(self, observable, n=3, name='chebychev', **kwds):
+    def __init__(self,
+                 observable,
+                 n=3,
+                 name='chebychev', **kwds):
         """
         Args:
             observable (str) or (RooRealVar) or (list): Observable for the pdf
@@ -214,7 +225,10 @@ class Chebychev(PDF):
 
 
 class ChebychevProd(ProdPdf):
-    def __init__(self, observables, n=3, name="Chebychev_bkg", **kwds):
+    def __init__(self,
+                 observables,
+                 n=3,
+                 name="Chebychev_bkg", **kwds):
         """Product of polynomials in the observable dimensions
         """
         pdfs = []
@@ -229,8 +243,14 @@ class ChebychevProd(ProdPdf):
 
 
 class KernelDensity(PDF):
-    def __init__(self, observable, data=None, weights=None, name='kde_bkg', description='', **kwds):
-        self.description = description
+    """ Kernel Density estimator PDF
+
+    """
+    def __init__(self,
+                 observable,
+                 data=None,
+                 name='kde_bkg', **kwds):
+
         self.data = data  # if isinstance(data, ROOT.RooDataSet) else self.get_fit_data(data, weights)
 
         super(KernelDensity, self).__init__(name=name, observables=[observable], **kwds)
@@ -241,7 +261,7 @@ class KernelDensity(PDF):
 
     def _fit(self, data_roo):
         self.roo_pdf = ROOT.RooKeysPdf(self.name,
-                                       self.description,
+                                       self.title,
                                        self.get_observable(),
                                        data_roo,
                                        ROOT.RooKeysPdf.MirrorBoth)
@@ -269,7 +289,7 @@ class KernelDensityProd(ProdPdf):
         self.debug("Fitting all pfds")
         pdfs = {}
         for observable in self.observables:
-            kernel_density_factor = KernelDensity(self.observables[observable], name=self.name + observable )
+            kernel_density_factor = KernelDensity(self.observables[observable], name=self.name + observable)
             kernel_density_factor.fit(data_roo)
             pdfs[self.name + observable] = kernel_density_factor
         self.pdfs = pdfs
@@ -280,7 +300,13 @@ class DstD0BG(PDF):
     """ ROOT.RooDstD0BG for D0-D* mass difference
         [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + b*(dm/dm0 - 1)
     """
-    def __init__(self, observable, dm0=(139.57, 155), a=(0,  10), b=(1, 5), c=(1, 5), name='DstD0BG', **kwds):
+    def __init__(self,
+                 observable,
+                 dm0=(139.57, 155),
+                 a=(0,  10),
+                 b=(1, 5),
+                 c=(1, 5),
+                 name='DstD0BG', **kwds):
 
         super(DstD0BG, self).__init__(name=name, **kwds)
 

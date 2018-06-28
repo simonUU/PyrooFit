@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
-""" Allowing simulataneous fitting.
+""" Automatic combination of PDFs
+
+This module handles the automatic combination of PDFs.
+A combination can be a product or addition of two PDFs.
+
+Also convolution is supported.
 
 
-    Todo: This needs more work, just barely working
+Todo:
+    * This needs more work, just barely working
+    * Move and refactor simultaneous fitting
+
 """
 
+import ROOT
 
 from .pdf import PDF
 from .utilities import AttrDict, is_iterable
@@ -12,14 +21,42 @@ from .observables import create_roo_variable
 from .plotting import fast_plot
 from .data import df2roo
 
-import ROOT
-
 
 class AddPdf(PDF):
     """ Add PDF class, for generic addition of pdfs
 
+    This is a wrapper for ROOT.RooAddPdf it combines two PDF classes into an new PDF normed by normalisation factors.
+    It is the generic way to fit multiple components in a fit.
+
+    Examples:
+        Two models of clas ``PDF`` can easily combined automatically by calling:
+        `` add_pdf = pdf1 + pdf2 ``
+
+        If more than two models are to be combined:
+        `` add_pdf = AddPdf([pdf1, pdf2, pdf3])
+
+    Attributes:
+        pdfs (AttrDict): dict of pdfs in the object
+        norms (AttrDict): dict of normalisations
+
+
+    Todo:
+        * Allow for absolute and relative normalisations.
+
     """
+
     def __init__(self, pdfs=None, name=None, **kwds):
+        """ Init of the AddPdf
+
+        Args:
+            pdfs (:obj:`list` of :obj:`PDF`, optional):
+                List of PDFs to be combined into the ROOT.RooAddPdf
+            name (:obj:`str`, optional):
+                Name of the combined object, if not specified, generic name from composites is created
+            **kwds:
+                Keyword Args for the PDF class
+
+        """
 
         self.pdfs = AttrDict()
         self.first_pdf = None  # remember which was passed first to identify signal in plotting
@@ -33,29 +70,64 @@ class AddPdf(PDF):
             if name is None:
                 name = "_plus_".join(pdf.name for pdf in pdfs)
         else:
-            name = "AddPdf"
+            if name is None:
+                name = "AddPdf"
 
         self.norms = AttrDict()
-        self._external_norms = {}  # To be used when there are external constraint norms
+
+        #: dict: external normalisations
+        self._external_norms = {}
+
         super(AddPdf, self).__init__(name=name, **kwds)
 
         self.use_extended = True
 
     def constrain_norm(self, pdf, normalization):
+        """ Constrain a norm with an external normalisation
+
+        Args:
+            pdf (:obj:`PDF` or :obj:`str`): PDF object from the AddPdf or name of corresponding PDF
+            normalization (:obj:`ROOT.RooAbsReal`): New normalisation to be used in the ROOT.RooAddPdf initialisation
+
+        """
+        assert isinstance(pdf, PDF) or isinstance(pdf, str), "please specify pdf"
+        if isinstance(pdf, PDF):
+            pdf = pdf.name
+        assert pdf in self.pdfs, "Pdf not found"
+
+        # assert isinstance(normalization, ROOT.RooAbsReal), "Please provide ROOT.RooAbsReal type as normalisation"
+
+        self._external_norms[pdf] = normalization
+        self.init_pdf()  # reset the pdf and change corresponding normalisation
+
+    def fix_norm(self, pdf, n=None, set_error=False):
+        """ Fix the normalisation to a specified value
+
+        Args:
+            pdf (:obj:`PDF`): PDF object of the AddPdf
+            n (:obj:`int`, optional): Fix to a specified normalisation value
+            set_error (bool or float, optioal): Set the error of the normalisation
+
+        """
         assert isinstance(pdf, PDF), "please specify pdf"
         assert pdf.name in self.pdfs, "Pdf not found"
-
-        self._external_norms[pdf.name] = normalization
-        self.init_pdf()
-
-    def fix_norm(self, pdf, n, ):
-        assert isinstance(pdf, PDF), "please specify pdf"
-        assert pdf.name in self.pdfs, "Pdf not found"
-        self.norms[pdf.name].setVal(n)
-        self.norms[pdf.name].setError(n**0.5)
+        if n is not None:
+            self.norms[pdf.name].setVal(n)
+        if set_error:
+            if isinstance(set_error, bool):
+                self.norms[pdf.name].setError(n**0.5)
+            else:
+                self.norms[pdf.name].setError(set_error)
         self.norms[pdf.name].setConstant(True)
 
     def add(self, pdf, name=None):
+        """ Add a pdf to the AddPdf
+
+        Args:
+            pdf (:obj:`PDF`): PDF object to be added
+            name (:obj:`str`, optional): Name of the object within the AddPdf
+
+        """
         if name is None:
             name = pdf.name
         else:
@@ -66,6 +138,13 @@ class AddPdf(PDF):
         self.init_pdf()
 
     def init_pdf(self):
+        """ Initialise the AddPdf
+
+        In this function the initialization of the ROOT.RooAddPdf happens and the handling of the normalisations is
+        performed.
+
+        """
+
         # Discard old normalisations, observables and params
         # but hold on to at least one reference to avoid deletion
         old_norms = self.norms
@@ -84,7 +163,7 @@ class AddPdf(PDF):
 
         for pdf_name, pdf in self.pdfs.items():
             if pdf_name not in self._external_norms:
-                norm_var = ('n_'+pdf_name, 10, 0, 100000000)
+                norm_var = ('n_'+pdf_name, 10, 0, 100000000)  # This is dangerous
                 roo_norm = create_roo_variable(norm_var)
             else:
                 roo_norm = self._external_norms[pdf_name]
@@ -102,7 +181,12 @@ class AddPdf(PDF):
         self.roo_pdf = ROOT.RooAddPdf(name, title, argset_roo_pdf, argset_norm)
 
     def _plot(self, filename, observable, data=None, components=True, *args, **kwargs):
-        # pull_plot(self.pdf, self.last_data, observable, filename, *args, **kwargs)
+        """ overwrite of PDF plot function
+
+        This function is not to be used by user.
+
+        """
+
         if data is None:
             data = self.last_data
 
@@ -123,29 +207,25 @@ class AddPdf(PDF):
 
         fast_plot(self.roo_pdf, data, observable, filename, components=components, *args, **kwargs)
 
-    """
-        def _plot(self, filename, observable, data=None, *args, **kwargs):
-            #pull_plot(self.pdf, self.last_data, observable, filename, *args, **kwargs)
-            pdf_sig = None
-            pdf_bkg = None
-            if data is None:
-                data = self.last_data
-                if self.first_pdf in pdf_name:
-                    sig_norm = self.norms[pdf_name]
-                    pdf_sig = (pdf.roo_pdf, sig_norm.getVal())
-                else:
-                    bkg_norm = self.norms[pdf_name]
-                    pdf_bkg = (pdf.roo_pdf, bkg_norm.getVal())
-
-            pull_plot(self.roo_pdf, data, observable, filename, pdf_sig=pdf_sig, pdf_bkg=pdf_bkg, *args, **kwargs)
-    """
-
 
 class ProdPdf(PDF):
     """ Add PDF class, for generic product of pdfs
 
+    This is a wrapper of ROOT.RooProdPdf, generic product of two PDFs
+
     """
     def __init__(self, pdfs, name=None, **kwds):
+        """ Init of the ProdPdf
+
+        Args:
+            pdfs (:obj:`list` of :obj:`PDF`, optional):
+                List of PDFs to be combined into the ROOT.RooAddPdf
+            name (:obj:`str`, optional):
+                Name of the combined object, if not specified, generic name from composites is created
+            **kwds:
+                Keyword Args for the PDF class
+
+        """
         self.pdfs = AttrDict()
 
         for pdf in pdfs:
@@ -158,12 +238,24 @@ class ProdPdf(PDF):
         self.use_extended = False
 
     def add(self, pdf, name=None):
+        """ Add a pdf to the ProdPdf
+
+        Args:
+            pdf (:obj:`PDF`): PDF object to be added
+            name (:obj:`str`, optional): Name of the object within the AddPdf
+
+        """
         if name is None:
             name = pdf.name
         self.pdfs[name] = pdf
         self.init_pdf()
 
     def init_pdf(self):
+        """ Initialise the ProdPdf
+
+        In this function the initialization of the ROOT.RooProdPdf happens.
+
+        """
         # Discard old observables and params
         # but hold on to at least one reference to avoid deletion
         old_observables = self.observables

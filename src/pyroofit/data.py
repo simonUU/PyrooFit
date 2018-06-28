@@ -1,5 +1,27 @@
 # -*- coding: utf-8 -*-
-""" Conversion between Root and python
+""" Conversion between pandas.DataFrames and ROOT.RooDataSet
+
+This module takes care of the conversion between pandas.DataFrames and ROOT.RooDataSet.
+A major hurdle in the conversion process is, that data can obly be converted at the
+basis of ROOT.RooRealVars, where their range determines which columns are kept in the data.
+
+Examples:
+
+    The functions in this module are called internally be the PDF class, which takes track of all the variables and
+    observables to be converted.
+    If you want to call this function to convert a pandas DataFrame you need to pass the Frame and a list of
+    observables with a name corresponding to a column in the DataFrame.
+    ``
+    from pyroofit.data import df2roo
+    import numpy as np
+    import pandas as pd
+    import ROOT
+
+    df = {'mass': np.append(np.random.random_sample(1000)*10 + 745, np.random.normal(750, 1, 1000))}
+    df = pd.DataFrame(df)
+
+    var = ROOT.RooRealVar("mass", "Example Variable", 700, 600, 800)
+    roo_data = df2roo(df, {'mass': var})
 
 """
 
@@ -12,18 +34,22 @@ import numpy as np
 
 
 def roo2hist(roo, binning, obs, name, observables=None):
-    """
+    """ Convert data to a histogram
 
-    Parameters
-    ----------
-    roo
-    binning
-    obs
-    name
-    observables
+    Args:
+        roo (ROOT.RooAbsData):
+            Dataset to be binned
+        binning (int):
+            Number of bins
+        obs (ROOT.RooAbsReal):
+            Observable(s) to be binned
+        name (str):
+            Name of the resulting histogram
+        observables (ROOT.RooArgSet):
+            Set of observables
 
-    Returns
-    -------
+    Returns:
+        hist (ROOT.RooDataHist) Binned data
 
     """
 
@@ -39,31 +65,31 @@ def roo2hist(roo, binning, obs, name, observables=None):
 
 
 def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True, bins=None):
-    """Convert a DataFrame into a RooDataSet
+    """ Convert a DataFrame into a RooDataSet
     The `column` parameters select features of the DataFrame which should be included in the RooDataSet.
 
-    Parameters
-    ----------
-    df : DataFrame or array
-        Input data to be transformed to a RooDataSet
-    observables : dict
-        Dictionary of observables to convert data with the correct range of the observables of interest
-    columns : :obj:`list` of :obj:`str`, optional
-        List of column names of the DataFrame
-    name : :obj:`str`
-        Name of the Dataset should be unique to avoid problems with ROOT
-    weights : :obj:`str` or array, optional
-        Name or values of weights to assign weights to the RooDataSet
-    ownership : bool, optional
-        Experimental, True for ROOT garbage collection
-    bins : int
-        creates RooDataHist instead with specified number of bins
+    Args:
+        df (DataFrame or array) :
+            Input data to be transformed to a RooDataSet
+        observables (dict) :
+            Dictionary of observables to convert data with the correct range of the observables of interest
+        columns (:obj:`list` of :obj:`str`, optional) :
+            List of column names of the DataFrame
+        name (:obj:`str`)
+            Name of the Dataset should be unique to avoid problems with ROOT
+        weights (:obj:`str` or array, optional) :
+            Name or values of weights to assign weights to the RooDataSet
+        ownership (bool, optional) :
+            Experimental, True for ROOT garbage collection
+        bins (int):
+            creates RooDataHist instead with specified number of bins
 
-    Returns
-    -------
-    RooDataSet
-        A conversion of the DataFrame
+    Returns:
+        RooDataSet : A conversion of the DataFrame
 
+    Todo:
+        * Get rid of either columns or observables
+        * Allow observables to be list or dict
     """
 
     # Return DataFrame object
@@ -117,6 +143,7 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
     roo_argset = ROOT.RooArgSet()
     roo_var_list = []  # Hast to exist due to the python2 garbage collector
 
+    # If no observables are passed, convert all columns and create dummy variables
     if observables is None:
         for c in columns:
             v = ROOT.RooRealVar(c, c, df_subset[c].mean(),   df_subset[c].min(), df_subset[c].max(), )
@@ -138,6 +165,7 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
         df_roo = ROOT.RooDataSet(name, name, roo_argset, ROOT.RooFit.Import(df_tree),)
     ROOT.SetOwnership(df_roo, ownership)
 
+    # Experimental: return histogram data if bins are set
     if bins is not None:
         return roo2hist(df_roo, bins, roo_var_list[0], name, roo_argset)
 

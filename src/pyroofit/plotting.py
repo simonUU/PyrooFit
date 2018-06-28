@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-""" Plot function for the PDF class..
+""" Plot function for the PDF class
 
-    Difficult to make nice with all the ROOT calls.
+Tools to make nice plots from RooFit pdfs.
+The function fast_plot is used by the PDF class
+to make default plots.
 
-    TODO: - Plotter class containing the RooFit frame
-          - Equal length ticks
+Todo:
+    * Plotter class containing the RooFit frame
+    * Equal length ticks
+    * Provide matplolib functionality
 
 
 """
@@ -14,6 +18,15 @@ import ROOT
 
 
 class Plotter(ClassLoggingMixin):
+    """ Experimental Plotter class
+
+    This function serves the purpose to create a RooFit frame without the need to interface
+    RooFit.
+
+    Todo:
+        * Adding plot pdf functionality
+
+    """
     def __init__(self, pdf):
         super(Plotter, self).__init__()
         self.pdf = pdf
@@ -28,10 +41,15 @@ class Plotter(ClassLoggingMixin):
 
 
 def get_optimal_bin_size(n):
-    """
+    """Helper function to calculate optimal binning
+
     This function calculates the optimal amount of bins for the number of events n.
-    :param      n:  number of Events
-    :return:        optimal bin size
+
+    Args:
+        n (int): number of events to be binned
+
+    Returns:
+        (int): Optimal number of bins
 
     """
     return int(2 * n**(1/3.0))
@@ -40,7 +58,8 @@ def get_optimal_bin_size(n):
 def set_root_style(font_scale=1.0, label_scale=1.0):
     """  Setting a general style that one can look at plots without getting eye-cancer.
 
-        TODO: Absolute font size
+    Todo:
+        * Absolute font size
 
     """
     ROOT.gStyle.SetOptTitle(0)
@@ -67,38 +86,55 @@ def set_root_style(font_scale=1.0, label_scale=1.0):
 
 DEFAULT_PALETTE = [1, ROOT.kRed - 7, ROOT.kAzure + 5, ROOT.kMagenta+1, ROOT.kGreen-2, ROOT.kYellow]
 DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
+""" Default color pallette and draw style for ROOT.
 
+"""
 
-def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
+def fast_plot(model, data, observable, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
               fill_cycle=DEFAULT_STYLES, line_shade=0, legend=False, extra_text=None,
               ):
-    """ Function to plot the PDF model
+    """ Generic plot function
 
-    Parameters
-    ----------
-    model
-    data
-    z
-    filename
-    components
-    nbins
-    extra_info
-    lw
-    size
-    average
-    pi_label
-    font_scale
-    label_scale
-    color_cycle
-    fill_cycle
-    line_shade
-    legend
-    extra_text
+    Args:
+        model (RooAbsPDF):
+            Fit model to be drawn
+        data (RooDataSet):
+            Dataset to be plotted
+        observable (RooAbsVar):
+            Observable to be drawn
+        filename (str):
+            Name of the output file. Suffix determines file type
+        components (list of tuples):
+            Normalisation and ROOT.RooAbsPDF to be drawn searately
+        nbins (int):
+            Number of bins
+        extra_info (list or TPaveText):
+        lw (int):
+            Width of the line of the total fit model
+        size (int):
+            Plot size in pixels
+        average (bool):
+            Average bin content for calculating the pull distribution, if false, take central value
+        pi_label (bool):
+            Calculate the bin count in radians
+        font_scale (float):
+            Set relative font scale
+        label_scale (float):
+            Set relative lable scale
+        color_cycle (list of ROOT.TColor):
+            Overwrite for the default color cycle
+        fill_cycle (list of ROOT.TAttrFill):
+            Overwrite for the default fill cycle
+        line_shade (int):
+            Integer to add to the color cycle for the fill color
+        legend (list):
+            Vector with four coordinates for the TLegend position
+        extra_text (list of ROOT.TPaveText or ROOT.TPaveText):
+            Extra text to be drawn on the plor
 
-    Returns
-    -------
-
+    Todo:
+        * Change or remove extra_info
     """
 
     
@@ -106,9 +142,9 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
 
     numbins = get_optimal_bin_size(data.numEntries()) if nbins is None else nbins
     if isinstance(data, ROOT.RooDataHist):
-        numbins = z.getBins()
+        numbins = observable.getBins()
 
-    frame = z.frame(ROOT.RooFit.Title("Fit Result"), ROOT.RooFit.Bins(numbins))
+    frame = observable.frame(ROOT.RooFit.Title("Fit Result"), ROOT.RooFit.Bins(numbins))
     
     if isinstance(legend, list):
         assert len(legend) == 4, "Please provide four coordinates for the legend"
@@ -158,7 +194,7 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
 
     # Pi label because of...
     if pi_label:
-        pifactor = 1 if z.getMax() > 1.9 else 2
+        pifactor = 1 if observable.getMax() > 1.9 else 2
         ylabel = "Events / ( %.2f #pi rad )" % (1.0 / float(pifactor * numbins))
         frame.SetYTitle(ylabel)
 
@@ -171,14 +207,14 @@ def fast_plot(model, data, z, filename, components=None, nbins=None, extra_info=
     # Draw Pull
     canvas.cd(2)
     pulls = frame.pullHist("Data", "Model", average)
-    plot_pulls = z.frame(ROOT.RooFit.Name("Pull_distribution"),
-                         ROOT.RooFit.Title("Pull distribution"),
-                         ROOT.RooFit.Range("full_range"))
+    plot_pulls = observable.frame(ROOT.RooFit.Name("Pull_distribution"),
+                                  ROOT.RooFit.Title("Pull distribution"),
+                                  ROOT.RooFit.Range("full_range"))
 
     hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", numbins,
-                           z.getMin("full_range"), z.getMax("full_range"))
+                           observable.getMin("full_range"), observable.getMax("full_range"))
     pull_values = pulls.GetY()
-    xerr = (z.getMax("full_range") - z.getMin("full_range")) / (2. * numbins)  # numbins
+    xerr = (observable.getMax("full_range") - observable.getMin("full_range")) / (2. * numbins)  # numbins
     for i in range(numbins):
         hist_pulls.SetBinContent(i + 1, pull_values[i])
         pulls.SetPointEXlow(i, xerr)

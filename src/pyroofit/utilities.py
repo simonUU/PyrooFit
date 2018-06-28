@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Some utility constructs.
+
 """
 
 import logging
@@ -16,7 +17,9 @@ class Mixin(object):
 
 
 class ClassLoggingMixin(object):
-    """Mixin class that enables logging for instances of a specific class"""
+    """Mixin class that enables logging for instances of a specific class
+
+    """
     def __init__(self, *args, **kwds):
         """Initialise the logger instance"""
         super(ClassLoggingMixin, self).__init__(*args, **kwds)
@@ -52,7 +55,9 @@ class AttrDict(dict):
 
 
 def check_kwds(keys):
-    """Decorator factory for decorators checking for valid keyword argument names"""
+    """Decorator factory for decorators checking for valid keyword argument names
+
+    """
     def decorator(func):
         """Decorator applying a check for valid keyword argument names to the function"""
         valid_keys = set(keys)
@@ -69,7 +74,15 @@ def check_kwds(keys):
 
 
 def is_iterable(obj):
-    """Check if an object is iterable."""
+    """Check if an object is iterable
+
+    Args:
+        obj (object): Generic object
+
+    Returns:
+        True if is able to use python iterations
+
+    """
     return isinstance(obj, collections.Iterable)
 
 

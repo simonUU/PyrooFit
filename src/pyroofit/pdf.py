@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """ PDF base class
 
-The pdf base class is the main interface to ROOT.
-This class basically serves as a wrapper around
-AbsPDF of the Roofit package and takes, monitors and initiates
-observables and parmeters.
+The pdf base class is the main interface to ROOT. This class basically serves as a wrapper around AbsPDF of
+the Roofit package and takes, monitors and initiates observables and parameters.
 
-Examples
---------
+Examples:
 
+    How to add a new wrapper to a ROOT.AbsPdf:
+
+    ``
     class MyPDF(PDF):
         def __init__(self, x, param, name='MyPDF'):
             super(MyPDF, self).__init__(name=name, **kwds)
@@ -17,26 +17,49 @@ Examples
 
             param1 = self.add_parameter(param)
 
-            self.roo_pdf = ROOT.MyPDF(self.name, self.title, x, param1)
+            self.roo_pdf = ROOT.MyPDF(self.name, self.title, x, param1)``
 
 
 """
 
-
 from __future__ import print_function
+
+import ROOT
 
 from .utilities import ClassLoggingMixin, AttrDict
 from .data import df2roo
 from .plotting import fast_plot
 from .observables import create_roo_variable
 
-import ROOT
-
 
 class PDF(ClassLoggingMixin, object):
-    """Python Meta class for a ROOT.RooAbsPDF"""
+    """ Base class for the ROOT.RooFit wrapper
+
+    Attributes:
+        name (str): Name of the pdf
+        title (str) Title of the pdf, displayed automatically in the legend
+        observables (dict): Dictionary of the fit observables
+        parameters (dict): Dictionary of the fit parameters
+        roo_pdf (:obj:`ROOT.RooAbsPdf`): Basis ROOT.RooFit object of the wrapper
+        last_data (:obj:`ROOT.RooAbsData`): Reference to last fit data
+        last_fit: Reference to last fit result
+
+    Todo:
+        * Maybe remove observables key
+        * Add convolution to @ overwrite?
+
+    """
 
     def __init__(self, name, observables=None, title='PDF', **kwds):
+        """ Init of the PDF class
+
+        Args:
+            name (:obj:`str`): Name of the model
+            observables (:obj:`list` of :obj:`ROOT.RooRealVar`, optional): Deprecated
+            title (:obj:`str`): Title of the model
+            **kwds: >> May be removed
+
+        """
         super(PDF, self).__init__(**kwds)
 
         #: Unique identifier of the PDF
@@ -62,21 +85,44 @@ class PDF(ClassLoggingMixin, object):
         self.last_data = None
         self.last_fit = None
 
-        # Fit options
+        #: bool: Fit options for minuit
         self.use_minos = False
         self.use_hesse = True
         self.use_extended = False
         self.use_sumw2error = True
+
+        #: int: Flag for the ROOT output
         self.print_level = -1
 
     def __call__(self):
+        """ Call overwrite
+
+        Returns:
+            ROOT.RooAbsPdf base model
+
+        """
         return self.roo_pdf
 
     def __add__(self, other):
+        """ Add operator overwrite
+
+        Args:
+            other (:obj:`PDF`): Pdf to be added
+
+        Returns:
+            AddPdf of the two PDF objects
+
+        """
         from .composites import AddPdf
         return AddPdf([self, other])
 
     def __mul__(self, other):
+        """ Mul operator overwrite
+
+        Returns:
+            ProdPdf
+
+        """
         from .composites import ProdPdf
         return ProdPdf([self, other])
 
@@ -87,23 +133,21 @@ class PDF(ClassLoggingMixin, object):
         for p in self.parameters:
             self.__setattr__(p, self.parameters[p])
 
-    def add_parameter(self, param_var, param_name, final_name=None, **kwds):
-        """ Add Parameter
+    def add_parameter(self, param_var, param_name=None, final_name=None, **kwds):
+        """ Add fit parameter
 
-        Parameters
-        ----------
-        param_name
-        param_var
-        final_name
-        kwds
+        Args:
+            param_var (list or ROOT.RooRealVar): Initialisation of the parameter as list or ROOT object
+            param_name (:obj:`str`): Name of the parameter within the object (Not within ROOT namespace!)
+            final_name (:obj:`str`, optional): Name if the parameter within PDF and ROOT namespace
+            **kwds: create_roo_variable keywords
 
-        Returns
-        -------
-        RooRealVar
-            converted RooRealVar
+        Returns:
+            ROOT.RooRealVar reference to fit parameter
+
         """
-
         if final_name is None:
+            assert param_name is not None, "Please specify a parameter name"
             name = self.name + '_' + param_name
         else:
             name = final_name
@@ -113,10 +157,21 @@ class PDF(ClassLoggingMixin, object):
         return self.parameters[param_name]
 
     def add_observable(self, observable_var, **kwds):
+        """ Addidng a observable to the PDF
 
+        Observables are used in the PDF class to convert relevant columns in pandas.DataFrames
+
+        Args:
+            observable_var (list or ROOT.RooRealVar): Initialisation of the observable as list or ROOT object
+            **kwds: create_roo_variable keywords
+
+        Returns:
+            ROOT.RooRealVar reference to fit observable
+
+        """
         if isinstance(observable_var, list) or isinstance(observable_var, tuple):
             if not isinstance(observable_var[0], str):
-                print("WARNING : choosing automatic variable name 'x'")
+                self.warn("WARNING : choosing automatic variable name 'x'")
 
         roo_observable = create_roo_variable(observable_var, **kwds)
         name = roo_observable.GetName()
@@ -124,12 +179,16 @@ class PDF(ClassLoggingMixin, object):
         return self.observables[name]
 
     def get_fit_data(self, df, weights=None, observables=None, nbins=None):
-        """ Transforms DataFrame to a RooDataSet
+        """ Convert pandas.DataFrame to ROOT.RooAbsData containing only relevant columns
 
         Args:
-            df:
-            weights:
-            observables:
+            df (:obj:`DataFrame` or :obj:`array`): Fit data
+            weights (:obj:`str` or :obj:`array`, optional): Column name of weights or wrights data
+            observables (dict, optional): Dictionary of the observables to be converted
+            nbins (int, optional): Number of bins, created ROOT.RooDataHist instead
+
+        Returns:
+            ROOT.RooDataSet or ROOT.RooDataHist of relevant columns and rows of the input data
 
         """
         if observables is None:
@@ -139,29 +198,26 @@ class PDF(ClassLoggingMixin, object):
         return roo_data
 
     def fit(self, df, weights=None, nbins=None):
+        """ Fit a pandas or numoy data to the PDF
+
+        Args:
+            df (:obj:`DataFrame` or :obj:`array`): Fit data
+            weights (:obj:`str` or :obj:`array`, optional): Column name of weights or wrights data
+            nbins (int, optional): Number of bins, created ROOT.RooDataHist instead
+
+        Returns:
+            ROOT.RooFitResult of the fit
+
         """
-
-        Parameters
-        ----------
-        df
-        weights
-        nbins
-
-        Returns
-        -------
-
-        """
-
         self.logger.debug("Fitting")
         self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins)
         self._fit(self.last_data)
+        return self.last_fit
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
 
-        Args:
-            *args:
-            **kwargs:
+        This function is called before the fit and can be overwritten for certain use cases.
         """
         pass
 
@@ -169,11 +225,11 @@ class PDF(ClassLoggingMixin, object):
         """ Internal fit function
 
         Args:
-            data_roo (RooDataSet): Dataset to fit on the internal RooAbsPdf
+            data_roo (ROOT.RooDataSet): Dataset to fit on the internal RooAbsPdf
 
         """
         self._before_fit()
-        self.logger.warn("Performing actual fit")
+        self.info("Performing fit")
         self.last_fit = self.roo_pdf.fitTo(data_roo,
                                            ROOT.RooFit.Save(True),
                                            ROOT.RooFit.Warnings(ROOT.kFALSE),
@@ -185,15 +241,15 @@ class PDF(ClassLoggingMixin, object):
                                            ROOT.RooFit.Hesse(self.use_hesse),)
 
     def plot(self, filename, data=None, observable=None, *args, **kwargs):
-        """ Default Plot function
+        """ Default plotting function
 
         Args:
-            filename:
-            observable:
-            *args:
-            **kwargs:
-
-        Returns:
+            filename (str): Name of the output file. Suffix determines file type.
+            data (DataFrame or ROOT.RooDataSet, optional): Data to be plotted in the fit
+            observable (:obj:`ROOT.RooAbsReal` or str, optional): In case of multiple dimensions draw
+                projection to specified observable.
+            *args: Arguments for fast_plot
+            **kwargs: Keyword arguments for fast_plot
 
         """
         if self.last_data is None and data is None:
@@ -234,20 +290,32 @@ class PDF(ClassLoggingMixin, object):
 
     def _plot(self, filename, observable, data=None, *args, **kwargs):
         """ plot function to be overwritten
-
         Args:
-            filename:
-            observable:
-            *args:
-            **kwargs:
+            filename (str): Name of the output file. Suffix determines file type.
+            data (DataFrame or ROOT.RooDataSet, optional): Data to be plotted in the fit
+            observable (:obj:`ROOT.RooAbsReal` or str, optional): In case of multiple dimensions draw
+                projection to specified observable.
+            *args: Arguments for fast_plot
+            **kwargs: Keyword arguments for fast_plot
+
         """
         if data is None:
             data = self.last_data
         fast_plot(self.roo_pdf, data, observable, filename, *args, **kwargs)
 
     def _get_var(self, v, as_ufloat=False):
+        """ Internal getter for parameter values
+
+        Args:
+            v: Parameter name
+            as_ufloat: Return ufolat object
+
+        Returns:
+            :obj:`tuple` or :obj:`ufloat` mean and error of parameter
+        """
         mes = self.parameters[v]
         val = mes.getVal()
+
         # Now catch RooFormulaVar
         try:
             err = mes.getError()
@@ -268,10 +336,11 @@ class PDF(ClassLoggingMixin, object):
         """ Get one of the fitted parameter or print all if None is set
 
         Args:
-            parameter: name of the parameter
+            parameter (str): name of the parameter
+            as_ufloat (bool, optional): If true return ufloat object, else tuple
 
         Returns:
-            (ufloat) value and error of the parameter
+            :obj:`tuple` or :obj:`ufloat` mean and error of parameter
 
         """
 
@@ -296,9 +365,7 @@ class PDF(ClassLoggingMixin, object):
         """ Fix all parameters of the PDF
 
         Args:
-            constant:
-
-        Returns:
+            constant (bool, default=True): Set all parameter constant
 
         """
         for m in self.parameters:
@@ -310,9 +377,7 @@ class PDF(ClassLoggingMixin, object):
         use only with existing fit result
 
         Args:
-            sigma:
-
-        Returns:
+            sigma (int or float): Interval to constrain parameter is convidence of the error.
 
         """
         for m in self.parameters:
@@ -321,8 +386,13 @@ class PDF(ClassLoggingMixin, object):
             self.parameters[m].setMin(cent - sigma * err)
             self.parameters[m].setMax(cent + sigma * err)
 
-    def narrow(self, sigma):
-        """ Narrows all parameters within one sigma of the original definition"""
+    def narrow(self, sigma=1):
+        """ Narrows all parameters within one sigma of the original definition, keeps original limits
+
+        Args:
+            sigma (int or float): Interval to constrain parameter is convidence of the error.
+
+        """
         for m in self.parameters:
             l = self.parameters[m].getMin()
             h = self.parameters[m].getMax()
@@ -339,8 +409,8 @@ class PDF(ClassLoggingMixin, object):
         """ Randomize parameters of a pdf
 
         Args:
-            pdf (PDF): Pdf objcet
             frac: with of the Gauss added to each member
+
         """
         import random
         params = self.parameters if only is None else only
@@ -369,14 +439,7 @@ class PDF(ClassLoggingMixin, object):
 
     def check_convergence(self, err_lim_low, err_lim_high, n_refit=20,
                           only=None, exceptions=None, assym=False, ignore_n=True):
-        """
-
-        Args:
-            err_lim_lowm:
-            err_lim_high:
-            n_refit:
-
-        Returns:
+        """ Check an refit PDF if not converged, Experimental
 
         """
         passing = True
@@ -405,7 +468,10 @@ class PDF(ClassLoggingMixin, object):
                 break
 
         if not passing:
-            self.logger.error("Fit not converged due to %s (%.4f +-%.4f), try %d refitting "%(suspect,  suspect_value, suspect_error, n_refit))
+            self.warn("Fit not converged due to %s (%.4f +-%.4f), try %d refitting "%(suspect,
+                                                                                         suspect_value,
+                                                                                         suspect_error,
+                                                                                         n_refit))
             if n_refit == 0:
                 return False
             else:
@@ -415,9 +481,13 @@ class PDF(ClassLoggingMixin, object):
         return True
 
     def get_paramameters(self, par_name=None):
-        """
+        """ Get values for parameter
+
+        Args:
+            par_name (str, optional): Parameter name
 
         Returns:
+            list of [mean, error, min, max]
 
         """
         ret = {}
@@ -434,18 +504,13 @@ class PDF(ClassLoggingMixin, object):
         return ret
 
     def set_parameter(self, p, params):
-        """
+        """ Set parameter to value, error and limits, Experimental
 
         Args:
-            p:
-            params:
-
-        Returns:
+            p (str): Name of the parameter
+            params (list): [value, error=optional, min=optional, max=optional]
 
         """
-
-        print(p)
-
         assert p in self.parameters.keys(), 'Parameter not found'
 
         par = self.parameters[p]
@@ -465,15 +530,12 @@ class PDF(ClassLoggingMixin, object):
             self.error("Could not set parameter")
 
     def set_parameters(self, pars):
-        """
+        """ Set parameters in the pdf, Experimental
 
         Args:
-            pars:
-
-        Returns:
+            pars (list of lists):
 
         """
-
         for p in pars:
             ps1 = p.split('_')
             if not len(ps1) >= 2:
