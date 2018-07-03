@@ -26,7 +26,7 @@ class ClassLoggingMixin(object):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def debug(self, msg):
-       self.logger.debug(msg)
+        self.logger.debug(msg)
 
     def info(self, msg):
         self.logger.info(self, msg)

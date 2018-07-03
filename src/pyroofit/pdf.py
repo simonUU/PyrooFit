@@ -8,7 +8,7 @@ Examples:
 
     How to add a new wrapper to a ROOT.AbsPdf:
 
-    ``
+    :code:``
     class MyPDF(PDF):
         def __init__(self, x, param, name='MyPDF'):
             super(MyPDF, self).__init__(name=name, **kwds)
@@ -233,7 +233,7 @@ class PDF(ClassLoggingMixin, object):
         self.last_fit = self.roo_pdf.fitTo(data_roo,
                                            ROOT.RooFit.Save(True),
                                            ROOT.RooFit.Warnings(ROOT.kFALSE),
-                                           #ROOT.RooFit.PrintLevel(-1),
+                                           # ROOT.RooFit.PrintLevel(-1),
                                            ROOT.RooFit.PrintEvalErrors(-1),
                                            ROOT.RooFit.Extended(self.use_extended),
                                            ROOT.RooFit.SumW2Error(self.use_sumw2error),
@@ -285,8 +285,7 @@ class PDF(ClassLoggingMixin, object):
                     if observable == self.observables[o].GetName():
                         observable = self.observables[o]
                         break
-
-        self._plot(filename + '.' + suffix , observable, data, *args, **kwargs)
+        self._plot(filename + '.' + suffix, observable, data, *args, **kwargs)
 
     def _plot(self, filename, observable, data=None, *args, **kwargs):
         """ plot function to be overwritten
@@ -328,7 +327,8 @@ class PDF(ClassLoggingMixin, object):
             return val, err
         try:
             from uncertainties import ufloat
-            return ufloat(val, err)
+            ret = ufloat(val, err)
+            return ret
         except ImportError:
             return val, err
 
@@ -410,6 +410,8 @@ class PDF(ClassLoggingMixin, object):
 
         Args:
             frac: with of the Gauss added to each member
+            exceptions (list): List of excluded parameters
+            only (list): List of parameters to include
 
         """
         import random
@@ -439,7 +441,18 @@ class PDF(ClassLoggingMixin, object):
 
     def check_convergence(self, err_lim_low, err_lim_high, n_refit=20,
                           only=None, exceptions=None, assym=False, ignore_n=True):
-        """ Check an refit PDF if not converged, Experimental
+        """ Check convergence of PDF and refit
+
+        Args:
+            err_lim_low:
+            err_lim_high:
+            n_refit:
+            only:
+            exceptions:
+            assym:
+            ignore_n:
+
+        Returns:
 
         """
         passing = True
@@ -468,19 +481,22 @@ class PDF(ClassLoggingMixin, object):
                 break
 
         if not passing:
-            self.warn("Fit not converged due to %s (%.4f +-%.4f), try %d refitting "%(suspect,
-                                                                                         suspect_value,
-                                                                                         suspect_error,
-                                                                                         n_refit))
+            self.warn("Fit not converged due to %s (%.4f +-%.4f),"
+                      " try %d refitting " % (suspect, suspect_value, suspect_error, n_refit))
             if n_refit == 0:
                 return False
             else:
                 self.refit(randomize=True, exceptions=exceptions, only=only)
 
-                return self.check_convergence(err_lim_low, err_lim_high, n_refit - 1, only=only, exceptions=exceptions, assym=assym)
+                return self.check_convergence(err_lim_low,
+                                              err_lim_high,
+                                              n_refit - 1,
+                                              only=only,
+                                              exceptions=exceptions,
+                                              assym=assym)
         return True
 
-    def get_paramameters(self, par_name=None):
+    def get_parameters(self, par_name=None):
         """ Get values for parameter
 
         Args:

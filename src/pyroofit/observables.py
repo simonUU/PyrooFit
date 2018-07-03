@@ -63,7 +63,7 @@ def create_roo_variable(var=None, name='x', title='', lwb=None, upb=None, val=No
         return var
 
     # backward compatibility
-    if isinstance(var, list) or isinstance(var, tuple):
+    if isinstance(var, tuple) or isinstance(var, list):
         name_tmp, val, lwb, upb = extract_from_list(var)
         if name_tmp is not None:
             name = name_tmp

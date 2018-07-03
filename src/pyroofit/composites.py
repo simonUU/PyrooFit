@@ -355,7 +355,7 @@ class SimFit(PDF):
         for pdf, name in zip(self.sim_pdfs, self.pdf_names):
             self.roo_pdf.addPdf(pdf.roo_pdf, name)
 
-    def get_fit_data(self, df, weights=None, observables=None):
+    def get_fit_data(self, df, weights=None, observables=None, nbins=None):
         """overwritten"""
         data_sets = []
         imports = []
@@ -375,7 +375,7 @@ class SimFit(PDF):
                     observables = pdf.observables
                     all_observables.update(observables)
 
-                    roo_data = df2roo(data, observables=observables, weights=weights)
+                    roo_data = df2roo(data, observables=observables, weights=weights, nbins=nbins)
                     data_sets.append(roo_data)
                     imports.append(ROOT.RooFit.Import(name, roo_data))
         else:
@@ -384,7 +384,7 @@ class SimFit(PDF):
                 observables = pdf.observables
                 all_observables.update(observables)
 
-                roo_data = df2roo(df, observables=observables, weights=weights)
+                roo_data = df2roo(df, observables=observables, weights=weights, nbins=nbins)
                 data_sets.append(roo_data)
                 imports.append(ROOT.RooFit.Import(name, roo_data))
 

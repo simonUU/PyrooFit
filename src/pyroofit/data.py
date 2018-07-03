@@ -105,6 +105,8 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
         d = {list(observables.keys())[0]: np.array(df)}
         df = pd.DataFrame(d)
 
+    assert isinstance(df, pd.DataFrame), "Something in the conversion went wrong"
+
     # Gather columns in the DataFrame to be included in the rooDataSet
     if columns is None:
         if observables is not None:
@@ -127,9 +129,7 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
         # Check if weights are normalized
         w = df_subset['w']
         if len(w) != int(np.sum(w)):
-            #print("Oh no I have to renormalize , %d, %f"%(len(w), np.sum(w)))
             df_subset['w'] *= len(w)/float(np.sum(w))
-            #print("now it is %f"%np.sum(df_subset['w']))
 
     # Check for NaN values
     if df_subset.isnull().values.any():

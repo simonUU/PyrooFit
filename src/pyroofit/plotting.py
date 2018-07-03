@@ -58,6 +58,10 @@ def get_optimal_bin_size(n):
 def set_root_style(font_scale=1.0, label_scale=1.0):
     """  Setting a general style that one can look at plots without getting eye-cancer.
 
+    Args:
+        font_scale (float): Scale of the fonts
+        label_scale (float): Scale of the labels
+
     Todo:
         * Absolute font size
 
@@ -89,6 +93,7 @@ DEFAULT_STYLES = [1001, 3004,  3005, 3009, 3006]
 """ Default color pallette and draw style for ROOT.
 
 """
+
 
 def fast_plot(model, data, observable, filename, components=None, nbins=None, extra_info=None, lw=2, size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0, color_cycle=DEFAULT_PALETTE,
@@ -136,7 +141,6 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     Todo:
         * Change or remove extra_info
     """
-
     
     set_root_style(font_scale, label_scale)
 
@@ -150,7 +154,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
         assert len(legend) == 4, "Please provide four coordinates for the legend"
         leg = ROOT.TLegend(*legend)
     else:
-        leg = ROOT.TLegend(0.7,0.78,0.93,0.92)
+        leg = ROOT.TLegend(0.7, 0.78, 0.93, 0.92)
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
     leg.AddEntry(frame.findObject("Data"), "Data", "LEP")
@@ -240,7 +244,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     plot_pulls.GetXaxis().SetTickLength(plot_pulls.GetXaxis().GetTickLength() * 3.0)
     plot_pulls.GetYaxis().SetNdivisions(505)
     # set reasonable limits for the pull plots
-    if (hist_pulls.GetMaximum() > 3.5 or hist_pulls.GetMinimum() < -3.5):
+    if hist_pulls.GetMaximum() > 3.5 or hist_pulls.GetMinimum() < -3.5:
         plot_pulls.SetMinimum(-5.5)
         plot_pulls.SetMaximum(5.5)
     else:
@@ -295,5 +299,3 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
             box.Draw("same")
 
     canvas.SaveAs(filename)
-
-

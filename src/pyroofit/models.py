@@ -3,7 +3,6 @@
 
 This module contains predefined wrappers for ROOT.RooFit pdfs.
 
-
 """
 
 import ROOT
@@ -161,11 +160,11 @@ class CrystalBall(PDF):
 class Mbc(AddPdf):
     """ Mbc PDF
 
-        This pdf is predefined as Argus for the background and CB shape for the signal.
-        The shape parameters can be set to fitted parameters.
+    This pdf is predefined as Argus for the background and CB shape for the signal.
+    The shape parameters can be set to fitted parameters.
 
-        It can also integrate the argus function over the signal region to estimate the
-        number of background candidates there.
+    It can also integrate the argus function over the signal region to estimate the
+    number of background candidates there.
 
     """
     def __init__(self,
@@ -182,14 +181,14 @@ class Mbc(AddPdf):
         integral = self.pdfs['bkg']().analyticalIntegral(1, 'intrange')
         return integral
 
-    def argus_norm_integral(self, min, max, norm_min=5.22, norm_max=5.3):
+    def argus_norm_integral(self, lwb, upb, norm_min=5.22, norm_max=5.3):
         norm = self.get_argus_integral(norm_min, norm_max)
         if norm == 0:
             return 0
-        return self.get_argus_integral(min, max)/norm
+        return self.get_argus_integral(lwb, upb)/norm
 
-    def get_nb_sigreg(self):
-        return self.norms[self.name+"_argus"].getVal() * self.argus_norm_integral(5.27, 5.3)
+    def get_nb_sigreg(self, lwb=5.27, upb=5.3):
+        return self.norms[self.name+"_argus"].getVal() * self.argus_norm_integral(lwb, upb)
 
 
 class Chebychev(PDF):
@@ -298,7 +297,8 @@ class KernelDensityProd(ProdPdf):
 
 class DstD0BG(PDF):
     """ ROOT.RooDstD0BG for D0-D* mass difference
-        [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + b*(dm/dm0 - 1)
+    [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + b*(dm/dm0 - 1)
+
     """
     def __init__(self,
                  observable,
@@ -318,4 +318,3 @@ class DstD0BG(PDF):
         c = self.add_parameter(c, "c")
 
         self.roo_pdf = ROOT.RooDstD0BG(self.name, self.title, x, dm0, a, b, c)
-
