@@ -108,6 +108,8 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
         d = {list(observables.keys())[0]: np.array(df)}
         df = pd.DataFrame(d)
 
+    assert isinstance(df, pd.DataFrame), "Something in the conversion went wrong"
+
     # Gather columns in the DataFrame to be included in the rooDataSet
     if columns is None:
         if observables is not None:
