@@ -178,7 +178,7 @@ class PDF(ClassLoggingMixin, object):
         self.observables[name] = roo_observable
         return self.observables[name]
 
-    def get_fit_data(self, df, weights=None, observables=None, nbins=None, *args):
+    def get_fit_data(self, df, weights=None, observables=None, nbins=None, *args, **kwargs):
         """ Convert pandas.DataFrame to ROOT.RooAbsData containing only relevant columns
 
         Args:
@@ -194,10 +194,10 @@ class PDF(ClassLoggingMixin, object):
         if observables is None:
             observables = self.observables
 
-        roo_data = df2roo(df, observables=observables, weights=weights, bins=nbins, *args)
+        roo_data = df2roo(df, observables=observables, weights=weights, bins=nbins, *args, **kwargs)
         return roo_data
 
-    def fit(self, df, weights=None, nbins=None, *args):
+    def fit(self, df, weights=None, nbins=None, *args, **kwargs):
         """ Fit a pandas or numpy data to the PDF
 
         Args:
@@ -210,7 +210,7 @@ class PDF(ClassLoggingMixin, object):
 
         """
         self.logger.debug("Fitting")
-        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args)
+        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args, **kwargs)
         self._fit(self.last_data)
 
     def _before_fit(self, *args, **kwargs):
