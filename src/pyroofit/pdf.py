@@ -178,7 +178,7 @@ class PDF(ClassLoggingMixin, object):
         self.observables[name] = roo_observable
         return self.observables[name]
 
-    def get_fit_data(self, df, weights=None, observables=None, nbins=None):
+    def get_fit_data(self, df, weights=None, observables=None, nbins=None, *args):
         """ Convert pandas.DataFrame to ROOT.RooAbsData containing only relevant columns
 
         Args:
@@ -194,11 +194,11 @@ class PDF(ClassLoggingMixin, object):
         if observables is None:
             observables = self.observables
 
-        roo_data = df2roo(df, observables=observables, weights=weights, bins=nbins)
+        roo_data = df2roo(df, observables=observables, weights=weights, bins=nbins, *args)
         return roo_data
 
-    def fit(self, df, weights=None, nbins=None):
-        """ Fit a pandas or numoy data to the PDF
+    def fit(self, df, weights=None, nbins=None, *args):
+        """ Fit a pandas or numpy data to the PDF
 
         Args:
             df (:obj:`DataFrame` or :obj:`array`): Fit data
@@ -210,9 +210,8 @@ class PDF(ClassLoggingMixin, object):
 
         """
         self.logger.debug("Fitting")
-        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins)
+        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args)
         self._fit(self.last_data)
-        #return self.last_fit
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
