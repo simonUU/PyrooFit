@@ -172,8 +172,8 @@ class Mbc(AddPdf):
                  observable=("mbc", 5.22, 5.3),
                  name='mbc', **kwds):
 
-        argus_bkg_pdf = Argus(observable, name=name+"_argus")
-        cb_sig_pdf = CrystalBall(observable, name=name+"_cb")
+        argus_bkg_pdf = Argus(observable, name="argus")
+        cb_sig_pdf = CrystalBall(observable, name="cb")
         super(Mbc, self).__init__(pdfs=[cb_sig_pdf, argus_bkg_pdf], name=name, **kwds)
 
     def get_argus_integral(self, lwb, upb):
@@ -189,7 +189,7 @@ class Mbc(AddPdf):
         return self.get_argus_integral(min, max)/norm
 
     def get_nb_sigreg(self):
-        return self.norms[self.name+"_argus"].getVal() * self.argus_norm_integral(5.27, 5.3)
+        return self.norms["argus"].getVal() * self.argus_norm_integral(5.27, 5.3)
 
 
 class Chebychev(PDF):
@@ -249,10 +249,11 @@ class KernelDensity(PDF):
     def __init__(self,
                  observable,
                  data=None,
+                 mirror=True,
                  name='kde_bkg', **kwds):
 
         self.data = data  # if isinstance(data, ROOT.RooDataSet) else self.get_fit_data(data, weights)
-
+        self.use_mirror = ROOT.RooKeysPdf.NoMirror if not mirror else ROOT.RooKeysPdf.MirrorBoth
         super(KernelDensity, self).__init__(name=name, observables=[observable], **kwds)
 
     def init_pdf(self):
@@ -264,7 +265,7 @@ class KernelDensity(PDF):
                                        self.title,
                                        self.get_observable(),
                                        data_roo,
-                                       ROOT.RooKeysPdf.MirrorBoth)
+                                       self.use_mirror)
 
 
 class KernelDensityProd(ProdPdf):

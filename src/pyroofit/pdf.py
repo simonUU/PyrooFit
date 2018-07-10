@@ -212,7 +212,7 @@ class PDF(ClassLoggingMixin, object):
         self.logger.debug("Fitting")
         self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins)
         self._fit(self.last_data)
-        return self.last_fit
+        #return self.last_fit
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
@@ -229,7 +229,7 @@ class PDF(ClassLoggingMixin, object):
 
         """
         self._before_fit()
-        self.info("Performing fit")
+        self.logger.info("Performing fit")
         self.last_fit = self.roo_pdf.fitTo(data_roo,
                                            ROOT.RooFit.Save(True),
                                            ROOT.RooFit.Warnings(ROOT.kFALSE),

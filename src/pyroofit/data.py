@@ -64,7 +64,8 @@ def roo2hist(roo, binning, obs, name, observables=None):
     return hist
 
 
-def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True, bins=None):
+def df2roo(df, observables=None, columns=None, name='data', weights=None, ownership=True, bins=None,
+           norm_weights=True):
     """ Convert a DataFrame into a RooDataSet
     The `column` parameters select features of the DataFrame which should be included in the RooDataSet.
 
@@ -83,6 +84,8 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
             Experimental, True for ROOT garbage collection
         bins (int):
             creates RooDataHist instead with specified number of bins
+        norm_weights (bool) :
+            Normalise weights to sum of events
 
     Returns:
         RooDataSet : A conversion of the DataFrame
@@ -126,10 +129,9 @@ def df2roo(df, observables=None, columns=None, name='data', weights=None, owners
             df_subset['w'] = weights
         # Check if weights are normalized
         w = df_subset['w']
-        if len(w) != int(np.sum(w)):
-            #print("Oh no I have to renormalize , %d, %f"%(len(w), np.sum(w)))
-            df_subset['w'] *= len(w)/float(np.sum(w))
-            #print("now it is %f"%np.sum(df_subset['w']))
+        if norm_weights:
+            if len(w) != int(np.sum(w)):
+                df_subset['w'] *= len(w)/float(np.sum(w))
 
     # Check for NaN values
     if df_subset.isnull().values.any():
