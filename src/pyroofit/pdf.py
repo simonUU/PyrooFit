@@ -153,6 +153,7 @@ class PDF(ClassLoggingMixin, object):
             name = final_name
         roo_param = create_roo_variable(param_var, name=name, **kwds)
         self.parameters[param_name] = roo_param
+        self.parameter_names[param_name] = name
         self.__setattr__(param_name, roo_param)
         return self.parameters[param_name]
 
@@ -232,7 +233,7 @@ class PDF(ClassLoggingMixin, object):
         self.last_fit = self.roo_pdf.fitTo(data_roo,
                                            ROOT.RooFit.Save(True),
                                            ROOT.RooFit.Warnings(ROOT.kFALSE),
-                                           # ROOT.RooFit.PrintLevel(-1),
+                                           ROOT.RooFit.PrintLevel(self.print_level),
                                            ROOT.RooFit.PrintEvalErrors(-1),
                                            ROOT.RooFit.Extended(self.use_extended),
                                            ROOT.RooFit.SumW2Error(self.use_sumw2error),
@@ -567,3 +568,38 @@ class PDF(ClassLoggingMixin, object):
                 if name_remote in name_self:
                     self.debug("Setting parameter %s in %s" % (p, sp))
                     self.set_parameter(sp, pars[p])
+
+    def get_curve(self, observable=None, npoints=1000):
+        """ Get projection of the pdf curve
+
+        Args:
+            observable (str, optional): Name of the observable
+            npoints (int): number of points, default=1000
+
+        Returns:
+            hx, hy : numpy arrays of x and y points of the pdf projection
+
+
+        Examples:
+            :code:``
+            import matplotlib.pyplot as plt
+            plt.plot(*pdf.get_curve())
+
+        """
+        import root_numpy
+        import numpy as np
+
+        if observable is not None:
+            assert isinstance(observable, str), "please specify the name of the observable"
+            assert observable in self.observables, "observable not found"
+        else:
+            observable = self.get_observable().GetName()
+        h = self.roo_pdf.createHistogram(observable, npoints)
+        hy, hx = root_numpy.hist2array(h, False, False, True)
+        # Normalise y
+        hy = npoints * hy / np.sum(hy)
+        # center x
+        hx = (hx[0][:-1] + hx[0][1:])/2.
+
+        return hx, hy
+

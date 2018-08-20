@@ -252,7 +252,10 @@ class KernelDensity(PDF):
                  name='kde_bkg', **kwds):
 
         self.data = data  # if isinstance(data, ROOT.RooDataSet) else self.get_fit_data(data, weights)
-        self.use_mirror = ROOT.RooKeysPdf.NoMirror if not mirror else ROOT.RooKeysPdf.MirrorBoth
+        if isinstance(mirror, bool):
+            self.use_mirror = ROOT.RooKeysPdf.NoMirror if not mirror else ROOT.RooKeysPdf.MirrorBoth
+        else:
+            self.use_mirror = mirror
         super(KernelDensity, self).__init__(name=name, observables=[observable], **kwds)
 
     def init_pdf(self):

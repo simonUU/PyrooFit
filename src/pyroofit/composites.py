@@ -375,7 +375,7 @@ class SimFit(PDF):
                     observables = pdf.observables
                     all_observables.update(observables)
 
-                    roo_data = df2roo(data, observables=observables, weights=weights, nbins=nbins)
+                    roo_data = df2roo(data, observables=observables, weights=weights, bins=nbins)
                     data_sets.append(roo_data)
                     imports.append(ROOT.RooFit.Import(name, roo_data))
         else:
