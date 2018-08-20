@@ -603,3 +603,26 @@ class PDF(ClassLoggingMixin, object):
 
         return hx, hy
 
+    def get_fwhm(self, observable=None, npoints=1000):
+        """ Calculate Full width at half maximum - EXPERIMENTAL
+
+        Args:
+            observable
+            npoints
+
+        Returns:
+            FWHM
+
+
+        """
+
+        if observable is not None:
+            assert isinstance(observable, str), "please specify the name of the observable"
+            assert observable in self.observables, "observable not found"
+        else:
+            observable = self.get_observable().GetName()
+        h = self.roo_pdf.createHistogram(observable, npoints)
+        bin1 = h.FindFirstBinAbove(h.GetMaximum()/2.)
+        bin2 = h.FindLastBinAbove(h.GetMaximum()/2.)
+        fwhm = h.GetBinCenter(bin2) - h.GetBinCenter(bin1)
+        return fwhm
