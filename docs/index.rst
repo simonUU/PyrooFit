@@ -106,6 +106,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   installation
    License <license>
    Authors <authors>
    Changelog <changelog>
@@ -118,3 +119,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+

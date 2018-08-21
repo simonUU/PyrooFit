@@ -581,9 +581,8 @@ class PDF(ClassLoggingMixin, object):
 
 
         Examples:
-            :code:``
-            import matplotlib.pyplot as plt
-            plt.plot(*pdf.get_curve())
+            >>> import matplotlib.pyplot as plt
+            >>> plt.plot(*pdf.get_curve())
 
         """
         import root_numpy
