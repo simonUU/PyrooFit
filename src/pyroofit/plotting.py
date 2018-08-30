@@ -108,7 +108,7 @@ def set_root_style(font_scale=1.0, label_scale=1.0):
     ROOT.gStyle.SetPadBottomMargin(0.12)
     ROOT.gStyle.SetPadTopMargin(0.05)
 
-    ROOT.gStyle.SetFillColor(0)
+    ROOT.gStyle.SetFillColor(10)
     ROOT.gStyle.SetMarkerSize(0.8)
     ROOT.gStyle.SetLineColor(ROOT.kBlack)
     ROOT.gStyle.SetLineWidth(1)
