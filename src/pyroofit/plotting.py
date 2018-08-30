@@ -178,6 +178,8 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     if isinstance(legend, list):
         assert len(legend) == 4, "Please provide four coordinates for the legend"
         leg = ROOT.TLegend(*legend)
+    elif legend == "top left":
+        leg = ROOT.TLegend(0.16, 0.78, 0.39, 0.92)
     else:
         leg = ROOT.TLegend(0.7, 0.78, 0.93, 0.92)
 
