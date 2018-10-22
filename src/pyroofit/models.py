@@ -299,6 +299,34 @@ class KernelDensityProd(ProdPdf):
         self.init_pdf()
 
 
+class HistPDF(PDF):
+    ''' Histogram template PDF
+
+    '''
+    def __init__(self,
+                 observable,
+                 name='histPDF',
+                 **kwds):
+        super(HistPDF, self).__init__(name=name, **kwds)
+
+        self.add_observable(observable)
+
+    def fit(self, df, weights=None, nbins=None, *args, **kwargs):
+        ''' Create the PDF from the data histogram
+
+        '''
+        self.logger.debug("Fitting")
+
+        # Data must be binned to fit a RooHistPdf
+        assert isinstance(nbins, int), self.logger.error("nbins must be specified in fit() to perform histogram template fit")
+        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args, **kwargs)
+
+        self.roo_pdf = ROOT.RooHistPdf(self.name,
+                                       self.title,
+                                       ROOT.RooArgSet(next(iter(self.observables.values()))),
+                                       self.last_data)
+
+
 class DstD0BG(PDF):
     """ ROOT.RooDstD0BG for D0-D* mass difference
     [ 1-exp{ (dm-dm0) / c} ] * (dm/dm0)**a + b*(dm/dm0 - 1)
