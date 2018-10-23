@@ -305,21 +305,19 @@ class HistPDF(PDF):
     '''
     def __init__(self,
                  observable,
+                 df,
+                 nbins,
+                 weights=None,
                  name='histPDF',
+                 *args,
                  **kwds):
         super(HistPDF, self).__init__(name=name, **kwds)
 
         self.add_observable(observable)
 
-    def fit(self, df, weights=None, nbins=None, *args, **kwargs):
-        ''' Create the PDF from the data histogram
-
-        '''
-        self.logger.debug("Fitting")
-
         # Data must be binned to fit a RooHistPdf
-        assert isinstance(nbins, int), self.logger.error("nbins must be specified in fit() to perform histogram template fit")
-        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args, **kwargs)
+        assert isinstance(nbins, int), self.logger.error("nbins must be integer")
+        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args, **kwds)
 
         self.roo_pdf = ROOT.RooHistPdf(self.name,
                                        self.title,
