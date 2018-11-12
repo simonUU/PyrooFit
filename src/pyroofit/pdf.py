@@ -83,7 +83,7 @@ class PDF(ClassLoggingMixin, object):
         registered = PdfManager.Instance().register_new(name)
         if not registered:
             self.logger.warning("PDF with name '%s' already registered! "
-                                "--->>> set name argument specifically in order to avoid errors")
+                                "--->>> set name argument specifically in order to avoid errors"% name)
 
         #: Title of the PDF
         self.title = title
