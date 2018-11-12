@@ -50,7 +50,7 @@ class PDF(ClassLoggingMixin, object):
 
     """
 
-    def __init__(self, name, observables=None, title='PDF', **kwds):
+    def __init__(self, name, observables=None, title=None, **kwds):
         """ Init of the PDF class
 
         Args:
@@ -67,6 +67,8 @@ class PDF(ClassLoggingMixin, object):
 
         #: Title of the PDF
         self.title = title
+        if self.title is None:
+            self.title = self.name
 
         #: dict(str->ROOT.RooRealVar) - Input variable form the data frame
         self.observables = AttrDict()
