@@ -26,10 +26,26 @@ from __future__ import print_function
 
 import ROOT
 
-from .utilities import ClassLoggingMixin, AttrDict
+from .utilities import ClassLoggingMixin, AttrDict, Singleton
 from .data import df2roo
 from .plotting import fast_plot
 from .observables import create_roo_variable
+
+@Singleton
+class PdfManager:
+    """ Holds track of created pdfs
+
+    """
+
+    def __init__(self):
+        self.registered_names = []
+
+    def register_new(self, name):
+        if not name in self.registered_names:
+            self.registered_names.append(name)
+            return True
+        else:
+            return False
 
 
 class PDF(ClassLoggingMixin, object):
@@ -64,6 +80,10 @@ class PDF(ClassLoggingMixin, object):
 
         #: Unique identifier of the PDF
         self.name = name
+        registered = PdfManager.Instance().register_new(name)
+        if not registered:
+            self.logger.warning("PDF with name '%s' already registered! "
+                                "--->>> set name argument specifically in order to avoid errors")
 
         #: Title of the PDF
         self.title = title
