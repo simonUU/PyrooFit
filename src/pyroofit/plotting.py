@@ -119,7 +119,7 @@ def set_root_style(font_scale=1.0, label_scale=1.0):
 def fast_plot(model, data, observable, filename, components=None, nbins=None, extra_info=None,  size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0,
               legend=False, extra_text=None, round_bins=5, tick_len=30,
-              color_cycle=DEFAULT_PALETTE, fill_cycle=DEFAULT_STYLES, lw=2, line_shade=0,
+              color_cycle=DEFAULT_PALETTE, fill_cycle=DEFAULT_STYLES, lw=2, line_shade=0, legend_data_name="Data", legend_fit_name="Fit",
               ):
     """ Generic plot function
 
@@ -184,10 +184,10 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
         leg = ROOT.TLegend(0.7, 0.78, 0.93, 0.92)
 
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
-    leg.AddEntry(frame.findObject("Data"), "Data", "LEP")
+    leg.AddEntry(frame.findObject("Data"), legend_data_name, "LEP")
 
     model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(color_cycle[0]))
-    leg.AddEntry(frame.findObject("Model"), "Fit", "L")
+    leg.AddEntry(frame.findObject("Model"), legend_fit_name, "L")
 
     if components is not None:
         n_col = 1
