@@ -163,6 +163,10 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
             magic to for automatically choosing the bin numbers
         tick_len (int) :
             Sets the length of the bins, EQUALLY (yes root. this is possible.), choose between 0-100
+        legend_data_name (str):
+            Name of the data part in the fit plot
+        legend_fit_name (str):
+            name of the total fit in the plot
 
     Todo:
         * Change or remove extra_info
