@@ -267,8 +267,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
 
     pull_values = pulls.GetY()
     xerr = (observable.getMax("full_range") - observable.getMin("full_range")) / (2. * nbins)  # numbins
-    print(pulls.GetN())
-    print(hist_pulls.GetNbinsX())
+
     for i in range(pulls.GetN()):
         hist_pulls.SetBinContent(i + 1, pull_values[i])
         pulls.SetPointEXlow(i, xerr)
@@ -331,7 +330,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
         hist_pulls.Draw("HISTsame")
     plot_pulls.Draw("Xsame")
 
-    line = ROOT.TLine(observable.getMin(model_range), 0, observable.getMax(model_range), 0)
+    line = ROOT.TLine(observable.getMin('Full'), 0, observable.getMax("Full"), 0)
     line.SetLineColor(1)
     line.SetLineStyle(2)
     line.Draw("same")
