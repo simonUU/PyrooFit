@@ -118,7 +118,7 @@ def set_root_style(font_scale=1.0, label_scale=1.0):
 
 def fast_plot(model, data, observable, filename, components=None, nbins=None, extra_info=None,  size=1280,
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0,
-              legend=False, extra_text=None, round_bins=5, tick_len=30,
+              legend=False, extra_text=None, round_bins=5, tick_len=30, model_range="Full",
               color_cycle=DEFAULT_PALETTE, fill_cycle=DEFAULT_STYLES, lw=2, line_shade=0, legend_data_name="Data", legend_fit_name="Fit",
               ):
     """ Generic plot function
@@ -190,7 +190,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
     leg.AddEntry(frame.findObject("Data"), legend_data_name, "LEP")
 
-    model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(color_cycle[0]))
+    model.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(color_cycle[0]), ROOT.RooFit.Range(model_range))
     leg.AddEntry(frame.findObject("Model"), legend_fit_name, "L")
 
     if components is not None:
@@ -202,13 +202,17 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
                      ROOT.RooFit.FillColor(color_cycle[n_col]),
                      ROOT.RooFit.FillStyle(fill_cycle[n_col]),
                      ROOT.RooFit.Name(c.GetName()),
-                     ROOT.RooFit.DrawOption("F"))
+                     ROOT.RooFit.DrawOption("F"),
+                     ROOT.RooFit.Range(model_range),
+                     )
             leg.AddEntry(frame.findObject(c.GetName()), c.getTitle().Data())
             c.plotOn(frame,
                      ROOT.RooFit.LineColor(color_cycle[n_col] + line_shade),
                      ROOT.RooFit.Normalization(ni, 2),
                      ROOT.RooFit.FillColor(color_cycle[n_col]),
-                     ROOT.RooFit.LineWidth(lw), )  # ROOT.RooFit.DrawOption("F")) #4050
+                     ROOT.RooFit.LineWidth(lw),
+                     ROOT.RooFit.Range(model_range),
+                     )  # ROOT.RooFit.DrawOption("F")) #4050
 
             n_col += 1
 
@@ -255,11 +259,17 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
                                   ROOT.RooFit.Title("Pull distribution"),
                                   ROOT.RooFit.Range("full_range"))
 
-    hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", nbins,
-                           observable.getMin("full_range"), observable.getMax("full_range"))
+    hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", pulls.GetN(),
+                           # pulls.GetXaxis().GetXmin(), pulls.GetXaxis().GetXmax())
+                           observable.getMin(model_range), observable.getMax(model_range))
+    # hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", nbins,
+    #                        observable.getMin("full_range"), observable.getMax("full_range"))
+
     pull_values = pulls.GetY()
     xerr = (observable.getMax("full_range") - observable.getMin("full_range")) / (2. * nbins)  # numbins
-    for i in range(nbins):
+    print(pulls.GetN())
+    print(hist_pulls.GetNbinsX())
+    for i in range(pulls.GetN()):
         hist_pulls.SetBinContent(i + 1, pull_values[i])
         pulls.SetPointEXlow(i, xerr)
         pulls.SetPointEXhigh(i, xerr)
@@ -315,10 +325,16 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     plot_pulls.SetMarkerStyle(6)
     plot_pulls.SetMarkerColor(0)  # This has to be the worst soloution
     plot_pulls.Draw("")
-    hist_pulls.SetFillColor(33)
-    hist_pulls.SetLineColor(33)
-    hist_pulls.Draw("HISTsame")
+    if model_range is "Full":
+        hist_pulls.SetFillColor(33)
+        hist_pulls.SetLineColor(33)
+        hist_pulls.Draw("HISTsame")
     plot_pulls.Draw("Xsame")
+
+    line = ROOT.TLine(observable.getMin(model_range), 0, observable.getMax(model_range), 0)
+    line.SetLineColor(1)
+    line.SetLineStyle(2)
+    line.Draw("same")
 
     if extra_text is not None:
         canvas.cd(1)

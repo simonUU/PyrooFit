@@ -213,8 +213,8 @@ class PDF(ClassLoggingMixin, object):
 
         """
         self.logger.debug("Fitting")
-        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, *args, **kwargs)
-        self._fit(self.last_data)
+        self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, )
+        self._fit(self.last_data, *args, **kwargs)
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
@@ -223,7 +223,7 @@ class PDF(ClassLoggingMixin, object):
         """
         pass
 
-    def _fit(self, data_roo):
+    def _fit(self, data_roo, *args, **kwargs):
         """ Internal fit function
 
         Args:
@@ -234,13 +234,14 @@ class PDF(ClassLoggingMixin, object):
         self.logger.info("Performing fit")
         self.last_fit = self.roo_pdf.fitTo(data_roo,
                                            ROOT.RooFit.Save(True),
-                                           ROOT.RooFit.Warnings(ROOT.kFALSE),
+                                           # ROOT.RooFit.Warnings(ROOT.kFALSE),
                                            ROOT.RooFit.PrintLevel(self.print_level),
+
                                            ROOT.RooFit.PrintEvalErrors(-1),
                                            ROOT.RooFit.Extended(self.use_extended),
                                            ROOT.RooFit.SumW2Error(self.use_sumw2error),
                                            ROOT.RooFit.Minos(self.use_minos),
-                                           ROOT.RooFit.Hesse(self.use_hesse),)
+                                           ROOT.RooFit.Hesse(self.use_hesse), *args, **kwargs)
 
     def plot(self, filename, data=None, observable=None, *args, **kwargs):
         """ Default plotting function
