@@ -22,6 +22,6 @@ data = np.random.normal(0, 1, 1000)
 
 pdf = Gauss(('x', -3, 3), mean=(-1, 0, 1))
 pdf.fit(data)
-pdf.plot('example_gauss.pdf',)
+pdf.plot('simple_fit.pdf',)
 
 pdf.get()

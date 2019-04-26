@@ -45,8 +45,6 @@ class Plotter(ClassLoggingMixin):
         self.frame = self.pdf.get_observable().frame(ROOT.RooFit.Title(title), ROOT.RooFit.Bins(self.nbins))
 
 
-
-
 def get_optimal_bin_size(n, round=True):
     """Helper function to calculate optimal binning
 
@@ -223,11 +221,11 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     canvas = ROOT.TCanvas("plot", "plot", size, size)
     canvas.Divide(1, 2)
     canvas.GetPad(1).SetPad(0.0, 0.25, 1, 1)
-    canvas.GetPad(1).SetBottomMargin(0.015)
+    canvas.GetPad(1).SetBottomMargin(0.02)
     canvas.GetPad(1).SetRightMargin(0.05)
     canvas.GetPad(1).SetTicks(1, 1)
     canvas.GetPad(2).SetPad(0.0, 0.0, 1, 0.25)
-    canvas.GetPad(2).SetBottomMargin(0.32)
+    canvas.GetPad(2).SetBottomMargin(0.36)
     canvas.GetPad(2).SetTopMargin(0.0)
     canvas.GetPad(2).SetRightMargin(0.05)
     canvas.GetPad(2).SetTicks(1, 1)
@@ -244,7 +242,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
         unit = observable.getUnit()
         if unit is not None or unit is not "":
             ylabel = "Events / ( %s / %d )" % (observable.getUnit(), div)
-            frame.SetYTitle(ylabel)
+            # frame.SetYTitle(ylabel)
 
     # Draw All The Stuff
     canvas.cd(1)
@@ -322,7 +320,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
         plot_pulls.SetMinimum(-3.5)
         plot_pulls.SetMaximum(3.5)
     plot_pulls.SetMarkerStyle(6)
-    plot_pulls.SetMarkerColor(0)  # This has to be the worst soloution
+    plot_pulls.SetMarkerColor(0)  # This has to be the worst solution
     plot_pulls.Draw("")
     if model_range is "Full":
         hist_pulls.SetFillColor(33)
