@@ -60,25 +60,25 @@ class AddPdf(PDF):
 
         self.pdfs = AttrDict()
         self.first_pdf = None  # remember which was passed first to identify signal in plotting
+        self.norms = AttrDict()
+
+        #: dict: external normalisations
+        self._external_norms = {}
 
         if pdfs is not None:
-            for pdf in pdfs:
-                if self.first_pdf is None:
-                    self.first_pdf = pdf.name
-                self.pdfs[pdf.name] = pdf
-
             if name is None:
                 name = "_plus_".join(pdf.name for pdf in pdfs)
         else:
             if name is None:
                 name = "AddPdf"
 
-        self.norms = AttrDict()
-
-        #: dict: external normalisations
-        self._external_norms = {}
-
         super(AddPdf, self).__init__(name=name, **kwds)
+
+        for pdf in pdfs:
+            # if self.first_pdf is None:
+            #     self.first_pdf = pdf.name
+            # self.pdfs[pdf.name] = pdf
+            self.add(pdf)
 
         self.use_extended = True
 
@@ -134,6 +134,14 @@ class AddPdf(PDF):
             pdf.name = name
         if self.first_pdf is None:
             self.first_pdf = pdf.name
+
+        # Check for duplicate names in pdfs
+        for n, p in self.pdfs.items():
+            if pdf.name == p.name:
+                self.logger.error("PDF with name %s already used, please choose unique names in" 
+                                  " AddPdf to avoid errors with ROOT internal naming." % n)
+                return
+
         self.pdfs[name] = pdf
         self.init_pdf()
 
@@ -173,7 +181,11 @@ class AddPdf(PDF):
             argset_roo_pdf.add(pdf.roo_pdf)
 
             self.observables.update(pdf.observables)
-            self.parameters.update(pdf.parameters)
+            # for obs_name, obs in pdf.observables.items():
+            #     self.observables[pdf_name + "_" + obs_name] = obs
+            # self.parameters.update(pdf.parameters)
+            for param_name, param in pdf.parameters.items():
+                self.parameters[pdf_name + "_" + param_name] = param
         #self.params.update(self.norms)
 
         name = self.name
@@ -236,6 +248,7 @@ class ProdPdf(PDF):
 
         super(ProdPdf, self).__init__(name=name, **kwds)
         self.use_extended = False
+        self.first_pdf = None
 
     def add(self, pdf, name=None):
         """ Add a pdf to the ProdPdf
@@ -247,6 +260,18 @@ class ProdPdf(PDF):
         """
         if name is None:
             name = pdf.name
+        else:
+            pdf.name = name
+        if self.first_pdf is None:
+            self.first_pdf = pdf.name
+
+        # Check for duplicate names in pdfs
+        for n, p in self.pdfs.items():
+            if pdf.name == p.name:
+                self.logger.error("PDF with name %s already used, please choose unique names in" 
+                                  " AddPdf to avoid errors with ROOT internal naming." % n)
+                return
+
         self.pdfs[name] = pdf
         self.init_pdf()
 
@@ -269,8 +294,8 @@ class ProdPdf(PDF):
         for pdf_name, pdf in self.pdfs.items():
 
             self.observables.update(pdf.observables)
-            self.parameters.update(pdf.parameters)
-
+            for param_name, param in pdf.parameters.items():
+                self.parameters[pdf_name + "_" + param_name] = param
             if pdf.roo_pdf is None:
                 self.warn("Pdf is None")
                 continue
