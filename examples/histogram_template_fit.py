@@ -18,7 +18,6 @@ pdf = HistPDF(
     template_data,
     nbins=10,
 )
-pdf.plot('example_hist.pdf')
 pdf.fix()
 pdf.get()
 
@@ -29,3 +28,4 @@ pdf2 = AddPdf([pdf])
 pdf2.fit(fit_data)
 # pdf2.plot('example_hist.pdf')  # Bug causes this to error atm
 pdf2.get()
+pdf2.plot('histogram_template_fit.pdf')

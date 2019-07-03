@@ -8,16 +8,18 @@ Examples:
 
     How to add a new wrapper to a ROOT.AbsPdf:
 
-    :code:``
-    class MyPDF(PDF):
-        def __init__(self, x, param, name='MyPDF'):
-            super(MyPDF, self).__init__(name=name, **kwds)
+    .. code-block:: python
 
-            x = self.add_observable(x)
+        class MyPDF(PDF):
+            def __init__(self, x, param, name='MyPDF'):
+                super(MyPDF, self).__init__(name=name, **kwds)
 
-            param1 = self.add_parameter(param)
+                x = self.add_observable(x)
 
-            self.roo_pdf = ROOT.MyPDF(self.name, self.title, x, param1)``
+                param1 = self.add_parameter(param)
+
+                self.roo_pdf = ROOT.MyPDF(self.name, self.title, x, param1)
+
 
 
 """

@@ -30,10 +30,16 @@ class AddPdf(PDF):
 
     Examples:
         Two models of clas ``PDF`` can easily combined automatically by calling:
-        `` add_pdf = pdf1 + pdf2 ``
+
+        .. code-block:: python
+
+            add_pdf = pdf1 + pdf2
 
         If more than two models are to be combined:
-        `` add_pdf = AddPdf([pdf1, pdf2, pdf3])
+        
+        .. code-block:: python
+
+             add_pdf = AddPdf([pdf1, pdf2, pdf3])
 
     Attributes:
         pdfs (AttrDict): dict of pdfs in the object

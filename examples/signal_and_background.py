@@ -32,5 +32,5 @@ pdf_bkg = Chebychev(x, n=1, title="Background")
 pdf = pdf_sig + pdf_bkg
 
 pdf.fit(df)
-pdf.plot('example_sig_bkg.pdf', legend=True)
+pdf.plot('signal_and_background.pdf', legend=True)
 pdf.get()

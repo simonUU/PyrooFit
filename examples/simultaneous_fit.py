@@ -6,7 +6,7 @@ WARNING: this is experimental and the interface might change
 """
 
 from pyroofit.models import Gauss, Chebychev
-from pyroofit.composits import SimFit
+from pyroofit.composites import SimFit
 import numpy as np
 import pandas as pd
 import ROOT
@@ -26,14 +26,14 @@ pdf_bkg = Chebychev(x, n=1)
 pdf = pdf_sig + pdf_bkg
 
 sf = SimFit(pdf, pdf_bkg)
-sf.use_extended = False  # bug
+sf.use_extended = True  # bug
 sf.use_minos = True
 sf.fit([(pdf, df_mixed), (pdf_bkg, df_bkg)])
 
-pdf_bkg.plot('example_simfit_bkg.pdf', df_bkg)
-pdf.plot('example_simfit_combined.pdf',
+#pdf_bkg.plot('simultaneous_fit_bkg.pdf', df_bkg)
+pdf.plot('simultaneous_fit.pdf',
          df_mixed,
          nbins=20,
-         extra_info=[["Legend"], ["More Legend"], ['#mu', *pdf.get('mean')], ['#sigma', *pdf.get('sigma')]])
+         extra_info=[["Legend"], ["More Legend"], ['#mu', *pdf_sig.get('mean')], ['#sigma', *pdf_sig.get('sigma')]])
 pdf.get()
 
