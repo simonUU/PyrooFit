@@ -7,6 +7,8 @@ PyrooFit is a fit framework for python and pandas DataFrames on top of the :code
 
 The package allows for simple fits of standard PDFs and easy setup of custom PDFs in one or more fit dimensions.
 
+For more documentation please consider the :ref:`modindex`.
+
 Example
 -------
 
@@ -44,6 +46,10 @@ A more complex example on combination of Gauss pdf for signal and Polynomial for
     pdf_bkg = Chebychev(x, n=1, title="Background")
 
     pdf = pdf_sig + pdf_bkg
+
+    # Alternatively:
+    # from pyroofit.composites import AddPdf
+    # pdf = AddPdf([pdf_sig, pdf_bkg])
 
     pdf.fit(df)
     pdf.plot('example_sig_bkg.pdf', legend=True)

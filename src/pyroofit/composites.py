@@ -36,7 +36,7 @@ class AddPdf(PDF):
             add_pdf = pdf1 + pdf2
 
         If more than two models are to be combined:
-        
+
         .. code-block:: python
 
              add_pdf = AddPdf([pdf1, pdf2, pdf3])

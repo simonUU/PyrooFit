@@ -11,17 +11,19 @@ Examples:
     observables to be converted.
     If you want to call this function to convert a pandas DataFrame you need to pass the Frame and a list of
     observables with a name corresponding to a column in the DataFrame.
-    ``
-    from pyroofit.data import df2roo
-    import numpy as np
-    import pandas as pd
-    import ROOT
 
-    df = {'mass': np.append(np.random.random_sample(1000)*10 + 745, np.random.normal(750, 1, 1000))}
-    df = pd.DataFrame(df)
+    .. code-block:: python
 
-    var = ROOT.RooRealVar("mass", "Example Variable", 700, 600, 800)
-    roo_data = df2roo(df, {'mass': var})
+        from pyroofit.data import df2roo
+        import numpy as np
+        import pandas as pd
+        import ROOT
+
+        df = {'mass': np.append(np.random.random_sample(1000)*10 + 745, np.random.normal(750, 1, 1000))}
+        df = pd.DataFrame(df)
+
+        var = ROOT.RooRealVar("mass", "Example Variable", 700, 600, 800)
+        roo_data = df2roo(df, {'mass': var})
 
 """
 
