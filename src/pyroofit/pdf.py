@@ -217,6 +217,7 @@ class PDF(ClassLoggingMixin, object):
         self.logger.debug("Fitting")
         self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, )
         self._fit(self.last_data, *args, **kwargs)
+        return self.last_fit
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
