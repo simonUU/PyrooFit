@@ -118,6 +118,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
               average=True, pi_label=False, font_scale=1.0, label_scale=1.0,
               legend=False, extra_text=None, round_bins=5, tick_len=30, model_range="Full",
               color_cycle=DEFAULT_PALETTE, fill_cycle=DEFAULT_STYLES, lw=2, line_shade=0, legend_data_name="Data", legend_fit_name="Fit",
+              doPull=True,
               ):
     """ Generic plot function
 
@@ -165,6 +166,8 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
             Name of the data part in the fit plot
         legend_fit_name (str):
             name of the total fit in the plot
+        doPull (bool):
+            add pull plot at the bottom
 
     Todo:
         * Change or remove extra_info
@@ -218,17 +221,23 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
     data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
 
     # Create Canvas
-    canvas = ROOT.TCanvas("plot", "plot", size, size)
-    canvas.Divide(1, 2)
-    canvas.GetPad(1).SetPad(0.0, 0.25, 1, 1)
-    canvas.GetPad(1).SetBottomMargin(0.02)
-    canvas.GetPad(1).SetRightMargin(0.05)
-    canvas.GetPad(1).SetTicks(1, 1)
-    canvas.GetPad(2).SetPad(0.0, 0.0, 1, 0.25)
-    canvas.GetPad(2).SetBottomMargin(0.36)
-    canvas.GetPad(2).SetTopMargin(0.0)
-    canvas.GetPad(2).SetRightMargin(0.05)
-    canvas.GetPad(2).SetTicks(1, 1)
+    canvas = ROOT.TCanvas("plot", "plot", size, int(size*0.75))
+    print("Do pull",doPull)
+    if doPull:
+        canvas.Divide(1, 2)
+        canvas.GetPad(1).SetPad(0.0, 0.25, 1, 1)
+        canvas.GetPad(1).SetBottomMargin(0.02)
+        canvas.GetPad(1).SetRightMargin(0.05)
+        canvas.GetPad(1).SetTicks(1, 1)
+        canvas.GetPad(2).SetPad(0.0, 0.0, 1, 0.25)
+        canvas.GetPad(2).SetBottomMargin(0.36)
+        canvas.GetPad(2).SetTopMargin(0.0)
+        canvas.GetPad(2).SetRightMargin(0.05)
+        canvas.GetPad(2).SetTicks(1, 1)
+    else:
+        canvas.SetRightMargin(0.05)
+        canvas.SetLeftMargin(0.14)
+        canvas.SetTicks(1, 1)
 
     # Pi label because of...
     if pi_label:
@@ -245,93 +254,101 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
             # frame.SetYTitle(ylabel)
 
     # Draw All The Stuff
-    canvas.cd(1)
+    if doPull: 
+        canvas.cd(1)
     frame.Draw()
+
+    if not doPull: 
+        # Messy
+        frame.GetYaxis().SetTitleSize(0.05)
+        frame.GetYaxis().SetTitleOffset(1.2*frame.GetYaxis().GetTitleOffset() * label_scale)
+
     if legend is not False:
         leg.Draw("same")
     
-    # Draw Pull
-    canvas.cd(2)
-    pulls = frame.pullHist("Data", "Model", average)
-    plot_pulls = observable.frame(ROOT.RooFit.Name("Pull_distribution"),
-                                  ROOT.RooFit.Title("Pull distribution"),
-                                  ROOT.RooFit.Range("full_range"))
+    if doPull: 
+        # Draw Pull
+        canvas.cd(2)
+        pulls = frame.pullHist("Data", "Model", average)
+        plot_pulls = observable.frame(ROOT.RooFit.Name("Pull_distribution"),
+                                      ROOT.RooFit.Title("Pull distribution"),
+                                      ROOT.RooFit.Range("full_range"))
 
-    hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", pulls.GetN(),
-                           # pulls.GetXaxis().GetXmin(), pulls.GetXaxis().GetXmax())
-                           observable.getMin(model_range), observable.getMax(model_range))
-    # hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", nbins,
-    #                        observable.getMin("full_range"), observable.getMax("full_range"))
+        hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", pulls.GetN(),
+                               # pulls.GetXaxis().GetXmin(), pulls.GetXaxis().GetXmax())
+                               observable.getMin(model_range), observable.getMax(model_range))
+        # hist_pulls = ROOT.TH1F("hist_pulls", "hist pulls", nbins,
+        #                        observable.getMin("full_range"), observable.getMax("full_range"))
 
-    pull_values = pulls.GetY()
-    xerr = (observable.getMax("full_range") - observable.getMin("full_range")) / (2. * nbins)  # numbins
+        pull_values = pulls.GetY()
+        xerr = (observable.getMax("full_range") - observable.getMin("full_range")) / (2. * nbins)  # numbins
 
-    for i in range(pulls.GetN()):
-        hist_pulls.SetBinContent(i + 1, pull_values[i])
-        pulls.SetPointEXlow(i, xerr)
-        pulls.SetPointEXhigh(i, xerr)
+        for i in range(pulls.GetN()):
+            hist_pulls.SetBinContent(i + 1, pull_values[i])
+            pulls.SetPointEXlow(i, xerr)
+            pulls.SetPointEXhigh(i, xerr)
 
-        pulls.SetPointEYlow(i, 0)
-        pulls.SetPointEYhigh(i, 0)
+            pulls.SetPointEYlow(i, 0)
+            pulls.SetPointEYhigh(i, 0)
 
-    plot_pulls.addPlotable(pulls, "PE1")
+        plot_pulls.addPlotable(pulls, "PE1")
 
-    # Messy
-    plot_pulls.GetYaxis().SetTitle("Pull")
-    plot_pulls.GetYaxis().CenterTitle()
-    plot_pulls.GetXaxis().SetTitleSize(0.18)
-    plot_pulls.GetYaxis().SetTitleSize(0.18)
-    plot_pulls.GetYaxis().SetTitleOffset(0.39)
-    plot_pulls.GetXaxis().SetTitleOffset(.82)
-    # plot_pulls.GetXaxis().SetTitleOffset(0.2)
-    plot_pulls.GetXaxis().SetLabelSize(0.12 * label_scale)
-    plot_pulls.GetYaxis().SetLabelSize(0.12 * label_scale)
-    # plot_pulls.GetYaxis().SetLabelOffset(0.0)
-    plot_pulls.GetYaxis().SetLabelOffset(0.006)
-    # plot_pulls.GetXaxis().SetLabelOffset(0.06)
-    plot_pulls.GetXaxis().SetTickLength(plot_pulls.GetXaxis().GetTickLength() * 3.0)
-    plot_pulls.GetYaxis().SetNdivisions(505)
+        # Messy
+        plot_pulls.GetYaxis().SetTitle("Pull")
+        plot_pulls.GetYaxis().CenterTitle()
+        plot_pulls.GetXaxis().SetTitleSize(0.18)
+        plot_pulls.GetYaxis().SetTitleSize(0.18)
+        plot_pulls.GetYaxis().SetTitleOffset(0.39)
+        plot_pulls.GetXaxis().SetTitleOffset(.82)
+        # plot_pulls.GetXaxis().SetTitleOffset(0.2)
+        plot_pulls.GetXaxis().SetLabelSize(0.12 * label_scale)
+        plot_pulls.GetYaxis().SetLabelSize(0.12 * label_scale)
+        # plot_pulls.GetYaxis().SetLabelOffset(0.0)
+        plot_pulls.GetYaxis().SetLabelOffset(0.006)
+        # plot_pulls.GetXaxis().SetLabelOffset(0.06)
+        plot_pulls.GetXaxis().SetTickLength(plot_pulls.GetXaxis().GetTickLength() * 3.0)
+        plot_pulls.GetYaxis().SetNdivisions(505)
 
-    ### Equal sized ticks!!
-    pad1 = canvas.GetPad(1)
-    pad2 = canvas.GetPad(2)
+        ### Equal sized ticks!!
+        pad1 = canvas.GetPad(1)
+        pad2 = canvas.GetPad(2)
 
-    pad1W = pad1.GetWw() * pad1.GetAbsWNDC()
-    pad1H = pad1.GetWh() * pad1.GetAbsHNDC()
-    pad2W = pad2.GetWw() * pad2.GetAbsWNDC()
-    pad2H = pad2.GetWh() * pad2.GetAbsHNDC()
+        pad1W = pad1.GetWw() * pad1.GetAbsWNDC()
+        pad1H = pad1.GetWh() * pad1.GetAbsHNDC()
+        pad2W = pad2.GetWw() * pad2.GetAbsWNDC()
+        pad2H = pad2.GetWh() * pad2.GetAbsHNDC()
 
-    # print(pad1W, pad1H, pad2W, pad2H)
+        # print(pad1W, pad1H, pad2W, pad2H)
 
-    frame.SetTickLength(tick_len/pad1W, "Y")
-    frame.SetTickLength(tick_len/pad1H, "X")
+        frame.SetTickLength(tick_len/pad1W, "Y")
+        frame.SetTickLength(tick_len/pad1H, "X")
 
-    plot_pulls.SetTickLength(tick_len/pad1H, "Y")
-    plot_pulls.SetTickLength(tick_len/pad2H, "X")
+        plot_pulls.SetTickLength(tick_len/pad1H, "Y")
+        plot_pulls.SetTickLength(tick_len/pad2H, "X")
 
-    frame.GetXaxis().SetLabelOffset(999)
-    frame.GetXaxis().SetLabelSize(0)
+        frame.GetXaxis().SetLabelOffset(999)
+        frame.GetXaxis().SetLabelSize(0)
 
-    # set reasonable limits for the pull plots
-    if hist_pulls.GetMaximum() > 3.5 or hist_pulls.GetMinimum() < -3.5:
-        plot_pulls.SetMinimum(-5.5)
-        plot_pulls.SetMaximum(5.5)
-    else:
-        plot_pulls.SetMinimum(-3.5)
-        plot_pulls.SetMaximum(3.5)
-    plot_pulls.SetMarkerStyle(6)
-    plot_pulls.SetMarkerColor(0)  # This has to be the worst solution
-    plot_pulls.Draw("")
-    if model_range is "Full":
-        hist_pulls.SetFillColor(33)
-        hist_pulls.SetLineColor(33)
-        hist_pulls.Draw("HISTsame")
-    plot_pulls.Draw("Xsame")
+        # set reasonable limits for the pull plots
+        if hist_pulls.GetMaximum() > 3.5 or hist_pulls.GetMinimum() < -3.5:
+            plot_pulls.SetMinimum(-5.5)
+            plot_pulls.SetMaximum(5.5)
+        else:
+            plot_pulls.SetMinimum(-3.5)
+            plot_pulls.SetMaximum(3.5)
+        plot_pulls.SetMarkerStyle(6)
+        plot_pulls.SetMarkerColor(0)  # This has to be the worst solution
+        plot_pulls.Draw("")
+        if model_range is "Full":
+            hist_pulls.SetFillColor(33)
+            hist_pulls.SetLineColor(33)
+            hist_pulls.Draw("HISTsame")
+        plot_pulls.Draw("Xsame")
 
-    line = ROOT.TLine(observable.getMin('Full'), 0, observable.getMax("Full"), 0)
-    line.SetLineColor(1)
-    line.SetLineStyle(2)
-    line.Draw("same")
+        line = ROOT.TLine(observable.getMin('Full'), 0, observable.getMax("Full"), 0)
+        line.SetLineColor(1)
+        line.SetLineStyle(2)
+        line.Draw("same")
 
     if extra_text is not None:
         canvas.cd(1)
