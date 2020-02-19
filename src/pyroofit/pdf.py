@@ -21,7 +21,6 @@ Examples:
                 self.roo_pdf = ROOT.MyPDF(self.name, self.title, x, param1)
 
 
-
 """
 
 from __future__ import print_function
