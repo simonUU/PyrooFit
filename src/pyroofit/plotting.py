@@ -201,6 +201,7 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
                      ROOT.RooFit.FillStyle(fill_cycle[n_col]),
                      ROOT.RooFit.Name(c.GetName()),
                      ROOT.RooFit.DrawOption("F"),
+                     ROOT.RooFit.VLines(), # if your pdf happens to not end on a point=0 you have to add this - obviously
                      ROOT.RooFit.Range(model_range),
                      )
             leg.AddEntry(frame.findObject(c.GetName()), c.getTitle().Data())

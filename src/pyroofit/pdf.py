@@ -631,3 +631,60 @@ class PDF(ClassLoggingMixin, object):
         bin2 = h.FindLastBinAbove(h.GetMaximum()/2.)
         fwhm = h.GetBinCenter(bin2) - h.GetBinCenter(bin1)
         return fwhm
+
+    def get_pull(self, observable, nbins):
+        """
+        Get the values of the pull distribution for a fitted pdf.
+        
+        RooFit is weird and allows you only to calculate the pulls on Plotable objects via the frame.
+        In order to do so you need a RootDataSet 'Data' and a Line object 'Model'.
+        
+        TODO: use the objects observable(s)?
+
+        Args:
+            observable: RooRealVar used for the fit
+            nbins: number of bins for the pull     
+
+        Returns:
+            python list containing the residuals
+
+        """
+        frame = observable.frame(ROOT.RooFit.Title("Fit Result"), ROOT.RooFit.Bins(nbins))
+        self.last_data.plotOn(frame, ROOT.RooFit.Name("Data"), ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2))
+        self.roo_pdf.plotOn(frame, ROOT.RooFit.Name("Model"), ROOT.RooFit.LineColor(1), ROOT.RooFit.Range("Full"))
+        pulls = frame.pullHist("Data", "Model", True)
+        pull_buffer = pulls.GetY()
+        return [pull_buffer[i] for i in range(pulls.GetN())]
+
+    def get_sampled_goodness_of_fit(self, observable, nbins=100):
+        """
+        Since most of the fits are unbinned the best way to get a goodness 
+        of fit is to sample the data and the fit function. 
+        
+        This means this chi2 is not a goodness of fit but rather a distance between 
+        fit function and data. For bins->infinity this should converge to 'Goodness of fit'.
+        Or what I am trying to say: this chi2 is not extracted from the fit.
+        
+        Two assumptions are made: 
+            - the data is not binned more finely than 100 bins in the given interval
+            - there is enough data to get a decent population in 100 bins
+        
+        Args:
+            observable: RooRealVar used for the fit
+            nbins: number of bins for the pull     
+        Returns:
+            chisquared
+            chisquared/ndf
+            pvalue
+            ndf 
+           
+        """
+    
+        pull_values = get_pull(observable=observable, nbins=nbins)
+        ndf = len(pull_values) - len(self.parameters)
+        chi2 = sum([x*x for x in pull_values])
+        reduced_chi2 = chi2/ndf
+        pvalue = ROOT.TMath.Prob(chi2, ndf)
+        return chi2, reduced_chi2, pvalue, ndf
+
+
