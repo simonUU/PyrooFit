@@ -14,6 +14,14 @@ from .observables import create_roo_variable
 class GenericPdf(PDF):
     """ generic PDF
         Note that 'x' must have the same name in the formula string as given in the observable
+
+        observable = ROOT.RooRealVar("x", "x", 0, -100, 100)
+        a = ROOT.RooRealVar("a", "a", 0, -1, 1)
+        b = ROOT.RooRealVar("b", "b", 0, -1, 1)
+        c = ROOT.RooRealVar("c", "c", 0, -1, 1)
+        list_of_RooRealVars = [a, b, c]
+        formula_string = "exp(x*a+b)+c"
+        gen_pdf = GenericPDF(observable, formula_string, list_of_RooRealVars, "exponential")
     """
     def __init__(self,
                  observable,
