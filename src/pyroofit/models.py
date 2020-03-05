@@ -25,7 +25,7 @@ class GenericPdf(PDF):
 
         x = self.add_observable(observable)
 
-        args = ROOT.RooArgList()
+        args = ROOT.RooArgSet()
         args.add(x)
         for v in list_of_RooRealVars:
           args.add(v)
