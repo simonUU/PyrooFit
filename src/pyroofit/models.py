@@ -11,6 +11,26 @@ from .pdf import PDF
 from .composites import AddPdf, ProdPdf
 from .observables import create_roo_variable
 
+class GenericPdf(PDF):
+    """ generic PDF
+        Note that 'x' must have the same name in the formula string as given in the observable
+    """
+    def __init__(self,
+                 observable,
+                 formula_string,
+                 list_of_RooRealVars = [],
+                 name='generi_pdf', **kwds):
+
+        super(GenericPDF, self).__init__(name=name,  **kwds)
+
+        x = self.add_observable(observable)
+
+        args = ROOT.RooArgList()
+        args.add(x)
+        for v in list_of_RooRealVars:
+          args.add(v)
+        self.roo_pdf.RooGenericPdf(self.name, self.title, formula_string, args)
+
 
 class Gauss(PDF):
     """ Standard gaussian
