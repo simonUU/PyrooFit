@@ -37,7 +37,7 @@ class GenericPdf(PDF):
         args.add(x)
         for v in list_of_RooRealVars:
           args.add(v)
-        self.roo_pdf.RooGenericPdf(self.name, self.title, formula_string, args)
+        self.roo_pdf = ROOT.RooGenericPdf(self.name, self.title, formula_string, args)
 
 
 class Gauss(PDF):
