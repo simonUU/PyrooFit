@@ -21,7 +21,7 @@ class GenericPdf(PDF):
         c = ROOT.RooRealVar("c", "c", 0, -1, 1)
         list_of_RooRealVars = [a, b, c]
         formula_string = "exp(x*a+b)+c"
-        gen_pdf = GenericPDF(observable, formula_string, list_of_RooRealVars, "exponential")
+        gen_pdf = GenericPdf(observable, formula_string, list_of_RooRealVars, "exponential")
     """
     def __init__(self,
                  observable,
