@@ -27,16 +27,17 @@ class GenericPdf(PDF):
                  observable,
                  formula_string,
                  list_of_RooRealVars = [],
-                 name='generi_pdf', **kwds):
+                 name='generic', **kwds):
 
-        super(GenericPDF, self).__init__(name=name,  **kwds)
+        super(GenericPdf, self).__init__(name=name,  **kwds)
 
         x = self.add_observable(observable)
 
-        args = ROOT.RooArgSet()
+        args = ROOT.RooArgList()
         args.add(x)
         for v in list_of_RooRealVars:
           args.add(v)
+          self.add_parameter(v, v.GetName())
         self.roo_pdf = ROOT.RooGenericPdf(self.name, self.title, formula_string, args)
 
 
