@@ -21,22 +21,23 @@ class GenericPdf(PDF):
         c = ROOT.RooRealVar("c", "c", 0, -1, 1)
         list_of_RooRealVars = [a, b, c]
         formula_string = "exp(x*a+b)+c"
-        gen_pdf = GenericPDF(observable, formula_string, list_of_RooRealVars, "exponential")
+        gen_pdf = GenericPdf(observable, formula_string, list_of_RooRealVars, "exponential")
     """
     def __init__(self,
                  observable,
                  formula_string,
                  list_of_RooRealVars = [],
-                 name='generi_pdf', **kwds):
+                 name='generic', **kwds):
 
-        super(GenericPDF, self).__init__(name=name,  **kwds)
+        super(GenericPdf, self).__init__(name=name,  **kwds)
 
         x = self.add_observable(observable)
 
-        args = ROOT.RooArgSet()
+        args = ROOT.RooArgList()
         args.add(x)
         for v in list_of_RooRealVars:
           args.add(v)
+          self.add_parameter(v, v.GetName())
         self.roo_pdf = ROOT.RooGenericPdf(self.name, self.title, formula_string, args)
 
 
