@@ -574,11 +574,12 @@ class PDF(ClassLoggingMixin, object):
                     self.debug("Setting parameter %s in %s" % (p, sp))
                     self.set_parameter(sp, pars[p])
 
-    def get_curve(self, observable=None, npoints=1000):
+    def get_curve(self, observable=None, norm=1, npoints=1000):
         """ Get projection of the pdf curve
 
         Args:
             observable (str, optional): Name of the observable
+            norm (float, optional): normalisation for the pdf, default=1
             npoints (int): number of points, default=1000
 
         Returns:
@@ -605,7 +606,30 @@ class PDF(ClassLoggingMixin, object):
         # center x
         hx = (hx[0][:-1] + hx[0][1:])/2.
 
-        return hx, hy
+        return hx, np.multiply(hy,norm)
+
+    def get_components_curve(self, norm=1, npoints=1000):
+        """ Get individual (normed) components of a composite pdf 
+
+        Args:
+            pdf (pyroofit.AddPdf): the composite pdf
+            norm (float, optional): normalisation for the pdf, default=1
+            npoints (int): number of points, default=1000
+
+        Returns:
+            curves (list/False): list of pdfs that composed pdf. If pdf is not composite, returns False 
+
+        """
+        from .composites import AddPdf
+        if isinstance(self, AddPdf):
+            total_norm = 0
+            for n in self.norms:
+                total_norm += self.norms[n].getVal()
+            curves = {}
+            for p in self.pdfs:
+                curves[p] = self.pdfs[p].get_curve(norm=norm*self.norms[p].getVal()/total_norm)
+            return curves
+        return False
 
     def get_fwhm(self, observable=None, npoints=1000):
         """ Calculate Full width at half maximum - EXPERIMENTAL
