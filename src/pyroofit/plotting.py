@@ -72,6 +72,9 @@ def get_optimal_bin_size(n, round=True):
         if isinstance(round, int):
             base = round
         n_opt = roundtobase(n_opt, base)
+    
+    if n_opt == 0: 
+        n_opt = 1
 
     return n_opt
 
