@@ -378,3 +378,108 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
             box.Draw("same")
 
     canvas.SaveAs(filename)
+def get_norm (nbins, N):
+    """ Returns normalistion that should be used for a PDF against a dataset of N entries, with nbins.
+    Args:
+        nbins(int): number of bins that data is binned in
+        N (int): number of entries in dataset
+    Returns:
+        norm (float): normalisation
+    """
+    return N/nbins
+def plot_as_pyplot(pdf, dataset,n_bins=50, dataset_name = 'Data',fit_name = 'Fit', x_name = "data", y_name = "Entries", unit = "", figsize=None,hatches=None, fcs=None):
+    """ Plots the PDF against the dataset using matplotlib.pyplot libraries
+    Args:
+       pdf(pyroofit.pdf.PDF): the fitted pdf to plot against a dataset
+       dataset(array-like): the dataset used to train the PDF
+       n_bins(int): number of bins for the dataset
+       dataset_name (string): name of the dataset that will appear on the legend, default = "Data"
+       fit_name (string): name of the fit that will appear on the legend, default = "Fit"
+       x_name (string): title of the x axis, default = "data"
+       y_name (string): first part of y axis title, appears as y_name/(bin_width unit), default = "Entries"
+       unit (string): the unit to appear on x and y axes, default = ""
+       figsize (tuple of float,float): size of plot as (fig_width,fig_height), if None, then (13,8.03), default = None
+       hatches (list of hatch patterns): list for hatches to be used (filling patterns for components)
+       fcs (list of fill colors): list for facecolors to be used (fills for components)
+       figsize (tuple of float,float): size of plot as (fig_width,fig_height), if None, then (13,8.03), default = None
+    Returns:
+       fig (Figure): matplotlib figure object
+       ax, ax_pull (array of axes.Axes): first axis contains the data/pdf plot, the second contains the pull distribution 
+
+    """
+    import matplotlib.pyplot as plt
+    plt.style.use('belle2')
+    import  numpy as np
+
+    # Define golden ratio for sizes
+    golden = (1 + 5 ** 0.5) / 2
+
+    STYLES_facecolor = fcs if fcs else [None, 'none', 'none', 'none', 'none', 'none']
+    STYLES_hatches = hatches if hatches else [None, '///', r"\\\ ",  'xxx', '--', '++', 'o', ".+", 'xx', '//', '*',  'O', '.']
+
+    if not figsize:
+        fig_width  =  13
+        fig_height = fig_width/golden
+    fig, (ax, ax_pull) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [golden**2,1],'hspace':0.05},
+                                      figsize=(fig_width,fig_height))
+    # Plot the dataset and figure out the normalisation
+
+    y, x = np.histogram(dataset,bins=n_bins)
+    err = (-0.5 + np.sqrt(np.array(y + 0.25)), +0.5 + np.sqrt(np.array(y + 0.25)))
+    bin_centers = (x[1:] + x[:-1]) / 2.0
+    ax.errorbar(bin_centers,y,err, color='black', label=dataset_name, fmt='o',markersize=2)
+    norm = get_norm(len(bin_centers),len(dataset))
+
+    # Plot total fit
+    ax.plot(*pdf.get_curve(norm=norm), color='black', label=fit_name)
+
+    # Plot separate contributions
+    curves = pdf.get_components_curve(norm=norm)
+    for count,c in enumerate(curves):
+        current_hatch = STYLES_hatches[count] if count<len(STYLES_hatches)-1 else 'none'
+        current_fc = STYLES_facecolor[count] if count<len(STYLES_facecolor)-1 else 'none'
+        current_color = next(ax._get_lines.prop_cycler)["color"]
+        ax.plot(*curves[c], color = current_color)
+        ax.fill_between(*curves[c], alpha=0.5,
+                        hatch     = current_hatch,
+                        facecolor = current_fc,
+                        edgecolor = current_color,
+                        label=c)
+
+    # Calculate pull distribution
+    bin_hwidth = np.array([(bin_centers[1] - bin_centers[0])*0.5]*len(bin_centers))
+
+    pulls = -(np.interp(bin_centers,*pdf.get_curve(norm=norm)) - y) / (y)**0.5
+
+    #Draw pull distribution and color area under each
+    line,caps,_ = ax_pull.errorbar(bin_centers,pulls, xerr = bin_hwidth,
+                     fmt='ko',
+                     markersize=3,
+                     ecolor = 'black')
+    ax_pull.bar(bin_centers,pulls,width=bin_hwidth*2,color='gray',alpha=0.5)
+
+
+    #Decorations, titles, ranges and names
+    # Plot legend
+    ax.legend(loc='best')
+    hfont = {'fontname':'sans-serif'}
+    #Setlimits
+    ax.set_xlim(min(dataset),max(dataset))
+    ax.set_ylim(0,)
+
+    ax_pull.set_xlim(min(dataset),max(dataset))
+    ylim = max(abs(min(pulls)*1.1),abs(max(pulls)*1.1))
+    ax_pull.set_ylim(-ylim,ylim)
+
+    #Set labels
+    ax.set_xticklabels([])
+    ax.set_ylabel(f'{y_name} / ( {bin_hwidth[0]:.1g} {unit})',**hfont)
+
+    ax_pull.set_ylabel('Pull',**hfont)
+    ax_pull.set_xlabel(f'{x_name}, {unit}',**hfont)
+    ax_pull.tick_params(which = 'both', top=True, right=True)
+    ax.tick_params(which = 'both',top=True, right=True)
+
+    fig.align_ylabels((ax,ax_pull))
+
+    return fig, (ax, ax_pull)
