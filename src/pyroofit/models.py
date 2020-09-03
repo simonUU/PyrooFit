@@ -11,6 +11,35 @@ from .pdf import PDF
 from .composites import AddPdf, ProdPdf
 from .observables import create_roo_variable
 
+class GenericPdf(PDF):
+    """ generic PDF
+        Note that 'x' must have the same name in the formula string as given in the observable
+
+        observable = ROOT.RooRealVar("x", "x", 0, -100, 100)
+        a = ROOT.RooRealVar("a", "a", 0, -1, 1)
+        b = ROOT.RooRealVar("b", "b", 0, -1, 1)
+        c = ROOT.RooRealVar("c", "c", 0, -1, 1)
+        list_of_RooRealVars = [a, b, c]
+        formula_string = "exp(x*a+b)+c"
+        gen_pdf = GenericPdf(observable, formula_string, list_of_RooRealVars, "exponential")
+    """
+    def __init__(self,
+                 observable,
+                 formula_string,
+                 list_of_RooRealVars = [],
+                 name='generic', **kwds):
+
+        super(GenericPdf, self).__init__(name=name,  **kwds)
+
+        x = self.add_observable(observable)
+
+        args = ROOT.RooArgList()
+        args.add(x)
+        for v in list_of_RooRealVars:
+          args.add(v)
+          self.add_parameter(v, v.GetName())
+        self.roo_pdf = ROOT.RooGenericPdf(self.name, self.title, formula_string, args)
+
 
 class Gauss(PDF):
     """ Standard gaussian
