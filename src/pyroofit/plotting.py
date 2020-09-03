@@ -378,6 +378,8 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
             box.Draw("same")
 
     canvas.SaveAs(filename)
+
+
 def get_norm (nbins, N):
     """ Returns normalistion that should be used for a PDF against a dataset of N entries, with nbins.
     Args:
@@ -387,7 +389,9 @@ def get_norm (nbins, N):
         norm (float): normalisation
     """
     return N/nbins
-def plot_as_pyplot(pdf, dataset,n_bins=50, dataset_name = 'Data',fit_name = 'Fit', x_name = "data", y_name = "Entries", unit = "", figsize=None,hatches=None, fcs=None):
+
+
+def plot_as_pyplot(pdf, dataset, n_bins=50, dataset_name = 'Data',fit_name = 'Fit', x_name = "data", y_name = "Entries", unit = "", figsize=None, hatches=None, fcs=None):
     """ Plots the PDF against the dataset using matplotlib.pyplot libraries
     Args:
        pdf(pyroofit.pdf.PDF): the fitted pdf to plot against a dataset
@@ -408,7 +412,6 @@ def plot_as_pyplot(pdf, dataset,n_bins=50, dataset_name = 'Data',fit_name = 'Fit
 
     """
     import matplotlib.pyplot as plt
-    plt.style.use('belle2')
     import  numpy as np
 
     # Define golden ratio for sizes
@@ -417,11 +420,7 @@ def plot_as_pyplot(pdf, dataset,n_bins=50, dataset_name = 'Data',fit_name = 'Fit
     STYLES_facecolor = fcs if fcs else [None, 'none', 'none', 'none', 'none', 'none']
     STYLES_hatches = hatches if hatches else [None, '///', r"\\\ ",  'xxx', '--', '++', 'o', ".+", 'xx', '//', '*',  'O', '.']
 
-    if not figsize:
-        fig_width  =  13
-        fig_height = fig_width/golden
-    fig, (ax, ax_pull) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [golden**2,1],'hspace':0.05},
-                                      figsize=(fig_width,fig_height))
+    fig, (ax, ax_pull) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [golden**2,1], 'hspace':0.05}, figsize=figsize)
     # Plot the dataset and figure out the normalisation
 
     y, x = np.histogram(dataset,bins=n_bins)
