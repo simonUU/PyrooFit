@@ -50,6 +50,15 @@ class PDF(ClassLoggingMixin, object):
         * Add convolution to @ overwrite?
 
     """
+    #: Storage of the roo fit data and last fit
+    last_data = None
+    last_fit = None
+
+    #: bool: Fit options for minuit
+    use_minos = False
+    use_hesse = True
+    use_extended = False
+    use_sumw2error = True
 
     def __init__(self, name, observables=None, title=None, **kwds):
         """ Init of the PDF class
@@ -85,14 +94,6 @@ class PDF(ClassLoggingMixin, object):
         self.roo_pdf = None
         self.init_pdf()
 
-        self.last_data = None
-        self.last_fit = None
-
-        #: bool: Fit options for minuit
-        self.use_minos = False
-        self.use_hesse = True
-        self.use_extended = False
-        self.use_sumw2error = True
 
         #: int: Flag for the ROOT output
         self.print_level = -1
@@ -216,7 +217,7 @@ class PDF(ClassLoggingMixin, object):
         self.logger.debug("Fitting")
         self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, )
         self._fit(self.last_data, *args, **kwargs)
-        # return self.last_fit
+        return self.last_fit
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
