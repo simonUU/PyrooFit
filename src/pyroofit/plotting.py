@@ -277,7 +277,8 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
 
         pulls.SetPointEYlow(i, 0)
         pulls.SetPointEYhigh(i, 0)
-
+        
+    pulls.SetMarkerSize(0)
     plot_pulls.addPlotable(pulls, "PE1")
 
     # Messy
@@ -324,14 +325,15 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
         plot_pulls.SetMinimum(-3.5)
         plot_pulls.SetMaximum(3.5)
     plot_pulls.SetMarkerStyle(6)
-    plot_pulls.SetMarkerColor(0)  # This has to be the worst solution
+    plot_pulls.SetMarkerSize(0)
+    plot_pulls.SetMarkerColor(1)  # This has to be the worst solution
     plot_pulls.Draw("")
     if model_range is "Full":
         hist_pulls.SetFillColor(33)
         hist_pulls.SetLineColor(33)
         hist_pulls.Draw("HISTsame")
     plot_pulls.Draw("Xsame")
-
+    print("ttttteeessdst")
     line = ROOT.TLine(observable.getMin('Full'), 0, observable.getMax("Full"), 0)
     line.SetLineColor(1)
     line.SetLineStyle(2)

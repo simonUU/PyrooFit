@@ -200,7 +200,7 @@ class PDF(ClassLoggingMixin, object):
 
         roo_data = df2roo(df, observables=observables, weights=weights, bins=nbins, *args, **kwargs)
         return roo_data
-
+        
     def fit(self, df, weights=None, nbins=None, *args, **kwargs):
         """ Fit a pandas or numpy data to the PDF
 
@@ -216,7 +216,7 @@ class PDF(ClassLoggingMixin, object):
         self.logger.debug("Fitting")
         self.last_data = self.get_fit_data(df, weights=weights, nbins=nbins, )
         self._fit(self.last_data, *args, **kwargs)
-        return self.last_fit
+        # return self.last_fit
 
     def _before_fit(self, *args, **kwargs):
         """ Template function before fit
@@ -377,15 +377,19 @@ class PDF(ClassLoggingMixin, object):
             self.logger.debug("Setting %s constant" % m)
             self.parameters[m].setConstant(constant)
 
-    def constrain(self, sigma):
+    def constrain(self, sigma, param=None):
         """ Constrain parameters within given significance
         use only with existing fit result
 
         Args:
             sigma (int or float): Interval to constrain parameter is convidence of the error.
+            param (float, optional): Specify which parameter to constrain
 
         """
         for m in self.parameters:
+            if param is not None:
+                if m is not param:
+                    continue
             cent = self.parameters[m].getVal()
             err = self.parameters[m].getError()
             self.parameters[m].setMin(cent - sigma * err)
@@ -557,22 +561,29 @@ class PDF(ClassLoggingMixin, object):
             pars (list of lists):
 
         """
-        for p in pars:
-            ps1 = p.split('_')
-            if not len(ps1) >= 2:
-                self.warn("Parameter %s can not be set" % p)
-                continue
-            name_remote = ps1[-1]
-
-            for sp in self.parameters:
-                ps2 = sp.split('_')
-                if not len(ps2) >= 2:
-                    self.warn("Parameter %s can not be set" % sp)
+        if isinstance(pars, list):
+            for p in pars:
+                ps1 = p.split('_')
+                if not len(ps1) >= 2:
+                    self.warn("Parameter %s can not be set" % p)
                     continue
-                name_self = ps2[-1]
-                if name_remote in name_self:
-                    self.debug("Setting parameter %s in %s" % (p, sp))
-                    self.set_parameter(sp, pars[p])
+                name_remote = ps1[-1]
+
+                for sp in self.parameters:
+                    ps2 = sp.split('_')
+                    if not len(ps2) >= 2:
+                        self.warn("Parameter %s can not be set" % sp)
+                        continue
+                    name_self = ps2[-1]
+                    if name_remote in name_self:
+                        self.debug("Setting parameter %s in %s" % (p, sp))
+                        self.set_parameter(sp, pars[p])
+        elif isinstance(pars, dict):
+            for p in pars:
+                self.debug("Setting parameter %s in %s" % (p, pars[p]))
+                self.set_parameter(p, pars[p])
+        else:
+            self.error("Please provide list or dict")
 
     def get_curve(self, observable=None, norm=1, npoints=1000):
         """ Get projection of the pdf curve
