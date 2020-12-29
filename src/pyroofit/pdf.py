@@ -59,6 +59,8 @@ class PDF(ClassLoggingMixin, object):
     use_hesse = True
     use_extended = False
     use_sumw2error = True
+    use_strategy = 1
+    use_numcpu = 2
 
     def __init__(self, name, observables=None, title=None, **kwds):
         """ Init of the PDF class
@@ -239,12 +241,13 @@ class PDF(ClassLoggingMixin, object):
                                            ROOT.RooFit.Save(True),
                                            # ROOT.RooFit.Warnings(ROOT.kFALSE),
                                            ROOT.RooFit.PrintLevel(self.print_level),
-
                                            ROOT.RooFit.PrintEvalErrors(-1),
                                            ROOT.RooFit.Extended(self.use_extended),
                                            ROOT.RooFit.SumW2Error(self.use_sumw2error),
                                            ROOT.RooFit.Minos(self.use_minos),
-                                           ROOT.RooFit.Hesse(self.use_hesse), *args, **kwargs)
+                                           ROOT.RooFit.Hesse(self.use_hesse),
+                                           ROOT.RooFit.Hesse(self.use_strategy),
+                                           ROOT.RooFit.NumCPU(self.use_numcpu),*args, **kwargs)
 
     def plot(self, filename, data=None, observable=None, *args, **kwargs):
         """ Default plotting function
