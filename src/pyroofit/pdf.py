@@ -61,6 +61,7 @@ class PDF(ClassLoggingMixin, object):
     use_sumw2error = True
     use_strategy = 1
     use_numcpu = 2
+    use_normalization = True
 
     def __init__(self, name, observables=None, title=None, **kwds):
         """ Init of the PDF class
@@ -246,8 +247,7 @@ class PDF(ClassLoggingMixin, object):
                                            ROOT.RooFit.SumW2Error(self.use_sumw2error),
                                            ROOT.RooFit.Minos(self.use_minos),
                                            ROOT.RooFit.Hesse(self.use_hesse),
-                                           ROOT.RooFit.Hesse(self.use_strategy),
-                                           ROOT.RooFit.NumCPU(self.use_numcpu),*args, **kwargs)
+                                           ROOT.RooFit.Strategy(self.use_strategy),*args, **kwargs)
 
     def plot(self, filename, data=None, observable=None, *args, **kwargs):
         """ Default plotting function
