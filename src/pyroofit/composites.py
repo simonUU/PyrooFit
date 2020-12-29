@@ -181,9 +181,12 @@ class AddPdf(PDF):
                 roo_norm = create_roo_variable(norm_var)
             else:
                 roo_norm = self._external_norms[pdf_name]
-            self.norms[pdf_name] = roo_norm
-            self.parameters['n_' + pdf_name] = roo_norm
-            argset_norm.add(roo_norm)
+
+            if pdf.use_normalization:
+                self.norms[pdf_name] = roo_norm
+                self.parameters['n_' + pdf_name] = roo_norm
+                argset_norm.add(roo_norm)
+            
             argset_roo_pdf.add(pdf.roo_pdf)
 
             self.observables.update(pdf.observables)
