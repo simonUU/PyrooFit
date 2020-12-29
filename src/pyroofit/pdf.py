@@ -718,7 +718,7 @@ class PDF(ClassLoggingMixin, object):
            
         """
     
-        pull_values = get_pull(observable=observable, nbins=nbins)
+        pull_values = self.get_pull(observable=observable, nbins=nbins)
         ndf = len(pull_values) - len(self.parameters)
         chi2 = sum([x*x for x in pull_values])
         reduced_chi2 = chi2/ndf
