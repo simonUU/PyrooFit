@@ -156,10 +156,12 @@ class PDF(ClassLoggingMixin, object):
         else:
             name = final_name
         roo_param = create_roo_variable(param_var, name=name, **kwds)
-        self.parameters[param_name] = roo_param
-        self.parameter_names[param_name] = name
-        self.__setattr__(param_name, roo_param)
-        return self.parameters[param_name]
+        self.parameters[name] = roo_param
+        self.parameter_names[name] = roo_param.GetName()
+        # ^ roo_param.GetName() will always be the same as name, except if
+        # a name was specified in the param_var tuple.
+        self.__setattr__(name, roo_param)
+        return self.parameters[name]
 
     def add_observable(self, observable_var, **kwds):
         """ Addidng a observable to the PDF
