@@ -341,11 +341,11 @@ def fast_plot(model, data, observable, filename, components=None, nbins=None, ex
 
     if extra_text is not None:
         canvas.cd(1)
-        if isinstance(extra_text, ROOT.TPaveText):
-            extra_info.Draw("Same")
+        if hasattr(extra_text, "Draw"):
+            extra_text.Draw("Same")
         if isinstance(extra_text, list):
             for txt in extra_text:
-                assert isinstance(txt, ROOT.TPaveText), "Please provide extra_txt with a list or ROOT.TPaveText"
+                assert hasattr(txt, "Draw"), "Please provide extra_txt with as a ROOT object with Draw method"
                 txt.Draw("Same")
 
     if extra_info is not None:
